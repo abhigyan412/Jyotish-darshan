@@ -1,7 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import type { BirthDetails, KundliChart } from "@/types";
-import { PLANET_META } from "@/lib/astro";
 
 interface Message {
   role: "user" | "assistant";
@@ -36,22 +35,11 @@ export default function ChartChat({ details, chart }: Props) {
     setInput("");
     setLoading(true);
 
-    const apiKey = sessionStorage.getItem("__kak");
-    const baseUrl = sessionStorage.getItem("__kbu") || undefined;
-
-    if (!apiKey) {
-      setMessages(prev => [...prev, { role: "assistant", content: "API key not found. Please go back and re-enter." }]);
-      setLoading(false);
-      return;
-    }
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          apiKey,
-          baseUrl,
           details,
           chart,
           messages: [...messages, userMsg],
@@ -67,7 +55,6 @@ export default function ChartChat({ details, chart }: Props) {
       const decoder = new TextDecoder();
       let full = "";
 
-      // Add empty assistant message to stream into
       setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
       while (true) {
@@ -108,7 +95,6 @@ export default function ChartChat({ details, chart }: Props) {
                 fontSize: 15,
                 lineHeight: 1.7,
                 color: m.role === "user" ? "var(--gold-light)" : "var(--text)",
-                fontStyle: m.role === "assistant" ? "normal" : "normal",
                 whiteSpace: "pre-wrap",
               }}
             >
