@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C96A;
+  --void: #080614;
+  --surface: #0F0D22;
+  --surface2: #181530;
+  --border: rgba(201, 168, 76, 0.25);
+  --text: #F0E8D5;
+  --muted: #9E96B8;
+  --dim: #7B7499;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--void);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+
+/* ─── Animations ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rotateSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fadeInUp { animation: fadeInUp 0.5s ease forwards; }
+.animate-rotateSlow { animation: rotateSlow 30s linear infinite; }
+.animate-pulse-slow { animation: pulse 2s ease-in-out infinite; }
+
+/* ─── Gold Gradient Text ─── */
+.gold-text {
+  background: linear-gradient(135deg, #F5D98A, #C9A84C, #E8C96A, #9B7A2E);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Shimmering Gold ─── */
+.gold-shimmer {
+  background: linear-gradient(90deg, #C9A84C, #F5D98A, #C9A84C, #9B7A2E, #C9A84C);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ─── Card ─── */
+.mystic-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mystic-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.5), transparent);
+  pointer-events: none;
+}
+
+/* ─── Input ─── */
+.mystic-input {
+  background: var(--surface2);
+  border: 0.5px solid rgba(201,168,76,0.2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.mystic-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+}
+
+.mystic-input::placeholder { color: var(--dim); }
+.mystic-input option { background: var(--surface2); }
+
+/* ─── Button ─── */
+.btn-gold {
+  background: linear-gradient(135deg, #7B5E1A, #C9A84C, #A8842A);
+  border: none;
+  border-radius: 10px;
+  color: #080614;
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  padding: 14px 24px;
+}
+
+.btn-gold:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.btn-gold:active:not(:disabled) { transform: scale(0.99); }
+.btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Interpretation Prose ─── */
+.interpretation-prose h3 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin: 1.5rem 0 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.interpretation-prose h3::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: rgba(201,168,76,0.25);
+}
+
+.interpretation-prose p {
+  font-size: 17px;
+  line-height: 1.85;
+  color: #DDD5C5;
+  margin-bottom: 0.75rem;
+}
+
+/* ─── Streaming cursor ─── */
+.streaming-cursor::after {
+  content: '▌';
+  color: var(--gold);
+  animation: pulse 1s step-end infinite;
+}
