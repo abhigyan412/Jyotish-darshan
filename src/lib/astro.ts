@@ -83,7 +83,7 @@ export function toJulianDay(dob: string, tob: string, tzOffset: number): number 
 export function getLahiriAyanamsa(jd: number): number {
   const T = (jd - 2451545.0) / 36525.0;
   // Lahiri ayanamsa — more precise
-  return 23.85 + 0.01396 * T;
+  return 23.85472 + 1.3972 * T;
 }
 // ─── Tropical → Sidereal ──────────────────────────────────────────────────────
 
@@ -187,10 +187,10 @@ function calcLagnaTropical(jd: number, lat: number, lon: number): number {
   const eps = (23.439291111 - 0.013004167 * T) * Math.PI / 180;
   const latR = lat * Math.PI / 180;
 
-  const num = Math.cos(LSTR);
-  const den = -Math.sin(LSTR) * Math.cos(eps) + Math.tan(latR) * Math.sin(eps);
-
-  let asc = Math.atan2(num, den) * 180 / Math.PI;
+  const sinLST = Math.sin(LSTR);
+  const cosLST = Math.cos(LSTR);
+  let asc = Math.atan2(-cosLST, Math.sin(eps) * Math.tan(latR) + Math.cos(eps) * sinLST) / (Math.PI / 180);
+  asc = ((asc + 180) % 360 + 360) % 360;
   asc = (asc + 360) % 360;
 
   return asc;
