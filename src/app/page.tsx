@@ -240,7 +240,7 @@ export default function LandingPage() {
 
         <section className="lp-section" style={{textAlign:"center"}}>
           <div className="lp-label" style={{display:"block"}}>✦ Pricing</div>
-          <h2 className="lp-h2">Simple, Honest Pricing</h2>
+          <h2 className="lp-h2">Pricing</h2>
           <p className="lp-lead" style={{margin:"0 auto 3rem"}}>Ancient wisdom should be accessible. Start free, go deeper when ready.</p>
           <div className="lp-pricing">
             <div className="lp-pricing-card">
