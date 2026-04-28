@@ -18,12 +18,18 @@ const SECTIONS: { key: InterpretationSection; label: string; icon: string }[] = 
 
 function formatText(text: string): string {
   return text
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/^#{1,3}\s+(.+)$/gm, "<strong>$1</strong>")
+    .replace(/^---$/gm, "<hr style='border:none;border-top:0.5px solid rgba(201,168,76,0.15);margin:0.8rem 0;'/>")
+    .replace(/^#{1,3}\s+(.+)$/gm, "<div style='font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:1.5px;color:var(--gold);margin:1.1rem 0 0.3rem;text-transform:uppercase;'>$1</div>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong style='color:var(--gold-light);font-weight:600;'>$1</strong>")
+    .replace(/^- (.+)$/gm, "<div style='padding-left:1rem;margin:0.2rem 0;'>· $1</div>")
+    .replace(/^\d+\.\s+(.+)$/gm, "<div style='padding-left:1rem;margin:0.25rem 0;'>$1</div>")
     .split(/\n{2,}/)
     .map(para => para.trim())
     .filter(Boolean)
-    .map(para => `<p>${para.replace(/\n/g, "<br/>")}</p>`)
+    .map(para => {
+      if (para.startsWith("<div") || para.startsWith("<hr")) return para;
+      return `<p style='margin:0 0 0.55rem;'>${para.replace(/\n/g, "<br/>")}</p>`;
+    })
     .join("");
 }
 
@@ -84,13 +90,18 @@ export default function InterpretationPanel({ details, chart }: Props) {
   useEffect(() => {
     fetchInterpretation(activeSection);
     return () => abortRef.current?.abort();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
 
   const displayText = cache[activeSection] || currentText;
 
   return (
-    <div>
+    <>
+      <style>{`
+        .interp-prose p { margin: 0 0 0.55rem; }
+        .interp-prose p:last-child { margin-bottom: 0; }
+      `}</style>
+
       {/* Section tabs */}
       <div className="flex flex-wrap gap-2 mb-5">
         {SECTIONS.map(s => (
@@ -113,14 +124,17 @@ export default function InterpretationPanel({ details, chart }: Props) {
         ))}
       </div>
 
-      {/* Content */}
+      {/* Content area */}
       <div className="min-h-[300px]">
+
+        {/* Error */}
         {error && (
           <div className="text-sm p-4 rounded-lg" style={{ background: "rgba(226,75,74,0.1)", border: "0.5px solid rgba(226,75,74,0.3)", color: "#E24B4A" }}>
             ⚠ {error}
           </div>
         )}
 
+        {/* Loading */}
         {!error && !displayText && streaming && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
             <div className="text-3xl animate-rotateSlow">✦</div>
@@ -130,14 +144,52 @@ export default function InterpretationPanel({ details, chart }: Props) {
           </div>
         )}
 
+        {/* Response — same bubble style as ChartChat assistant messages */}
         {displayText && (
-          <div
-            className={`interpretation-prose ${streaming && !cache[activeSection] ? "streaming-cursor" : ""}`}
-            dangerouslySetInnerHTML={{ __html: formatText(displayText) }}
-          />
+          <div style={{
+            padding: "18px 20px",
+            borderRadius: "4px 16px 16px 16px",
+            background: "var(--surface2)",
+            border: "0.5px solid rgba(201,168,76,0.12)",
+            fontSize: 14.5,
+            lineHeight: 1.75,
+            color: "var(--text)",
+          }}>
+            {/* Header */}
+            <div style={{
+              fontSize: 9,
+              color: "var(--gold)",
+              fontFamily: "Cinzel Decorative, serif",
+              letterSpacing: 1.5,
+              marginBottom: 12,
+              opacity: 0.8,
+            }}>
+              ✦ JYOTISH GUIDE — {SECTIONS.find(s => s.key === activeSection)?.label.toUpperCase()}
+            </div>
+
+            {/* Formatted content */}
+            <div
+              className="interp-prose"
+              dangerouslySetInnerHTML={{ __html: formatText(displayText) }}
+            />
+
+            {/* Streaming cursor */}
+            {streaming && !cache[activeSection] && (
+              <span style={{
+                display: "inline-block",
+                width: 2,
+                height: "1em",
+                background: "var(--gold)",
+                marginLeft: 2,
+                verticalAlign: "text-bottom",
+                animation: "blink 1s step-end infinite",
+              }} />
+            )}
+          </div>
         )}
       </div>
 
+      {/* Regenerate */}
       {!streaming && displayText && (
         <button
           onClick={() => {
@@ -151,6 +203,13 @@ export default function InterpretationPanel({ details, chart }: Props) {
           ↺ Regenerate
         </button>
       )}
-    </div>
+
+      <style>{`
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+    </>
   );
 }
