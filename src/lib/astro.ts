@@ -253,11 +253,16 @@ function detectYogas(planets: PlanetInfo[], lagna: RashiPosition): Yoga[] {
   const yogas: Yoga[] = [];
   const get = (k: PlanetKey) => planets.find(p => p.key === k)!;
   const ju = get("ju"), sa = get("sa"), mo = get("mo"),
-    su = get("su"), ve = get("ve"), ma = get("ma");
+    su = get("su"), ve = get("ve"), ma = get("ma"), me = get("me"),
+    ra = get("ra"), ke = get("ke");
 
-  // Gajakesari Yoga: Jupiter in kendra from Moon
-  const moJuHouseDiff = Math.abs(ju.house - mo.house);
-  if ([1, 4, 7, 10].includes(moJuHouseDiff === 0 ? 1 : moJuHouseDiff)) {
+  const kendras = [1, 4, 7, 10];
+  const trikonas = [1, 5, 9];
+
+  // ── Gajakesari Yoga: Jupiter in kendra from Moon ──────────────────────────
+  const moJuDiff = ((ju.house - mo.house + 12) % 12) + 1;
+  const moJuDiffRev = ((mo.house - ju.house + 12) % 12) + 1;
+  if (kendras.includes(moJuDiff) || kendras.includes(moJuDiffRev) || ju.house === mo.house) {
     yogas.push({
       name: "Gajakesari Yoga",
       description: "Jupiter in angular house from Moon — bestows wisdom, fame, and prosperity.",
@@ -267,39 +272,90 @@ function detectYogas(planets: PlanetInfo[], lagna: RashiPosition): Yoga[] {
     });
   }
 
-  // Budhaditya Yoga: Sun + Mercury same house
-  const me = get("me");
-  if (su.house === me.house && !me.isCombust) {
+  // ── Budhaditya Yoga: Sun + Mercury in same house ──────────────────────────
+  if (su.house === me.house) {
     yogas.push({
       name: "Budhaditya Yoga",
       description: "Sun and Mercury conjunct — sharp intellect, success in education and communication.",
       planets: ["su", "me"],
-      strength: "moderate",
+      strength: me.isCombust ? "weak" : "moderate",
       isBenefic: true,
     });
   }
 
-  // Panch Mahapurusha Yogas
-  const kendras = [1, 4, 7, 10];
-  if (kendras.includes(ma.house) && (ma.isExalted || ma.position.rashiIndex === 0 || ma.position.rashiIndex === 7)) {
-    yogas.push({ name: "Ruchaka Yoga", description: "Mars strong in angular house — courageous, disciplined, leadership.", planets: ["ma"], strength: "strong", isBenefic: true });
+  // ── Pancha Mahapurusha Yogas (relaxed: kendra + own/exalt/friendly sign) ─
+  // Ruchaka: Mars in kendra in Aries, Scorpio, or Capricorn
+  if (kendras.includes(ma.house) && [0, 7, 9].includes(ma.position.rashiIndex)) {
+    yogas.push({ name: "Ruchaka Yoga", description: "Mars strong in angular house — courageous, disciplined, natural leader.", planets: ["ma"], strength: "strong", isBenefic: true });
   }
-  if (kendras.includes(me.house) && (me.isExalted || me.position.rashiIndex === 2 || me.position.rashiIndex === 5)) {
-    yogas.push({ name: "Bhadra Yoga", description: "Mercury in own/exaltation in kendra — exceptional intellect and communication.", planets: ["me"], strength: "strong", isBenefic: true });
+  // Bhadra: Mercury in kendra in Gemini or Virgo
+  if (kendras.includes(me.house) && [2, 5].includes(me.position.rashiIndex)) {
+    yogas.push({ name: "Bhadra Yoga", description: "Mercury in own/exaltation sign in kendra — exceptional intellect and communication.", planets: ["me"], strength: "strong", isBenefic: true });
   }
-  if (kendras.includes(ju.house) && (ju.isExalted || ju.position.rashiIndex === 8 || ju.position.rashiIndex === 11)) {
+  // Hamsa: Jupiter in kendra in Sagittarius, Pisces, or Cancer
+  if (kendras.includes(ju.house) && [8, 11, 3].includes(ju.position.rashiIndex)) {
     yogas.push({ name: "Hamsa Yoga", description: "Jupiter strong in kendra — spiritual wisdom, prosperity, righteous conduct.", planets: ["ju"], strength: "strong", isBenefic: true });
   }
-  if (kendras.includes(ve.house) && (ve.isExalted || ve.position.rashiIndex === 1 || ve.position.rashiIndex === 6)) {
+  // Malavya: Venus in kendra in Taurus, Libra, or Pisces
+  if (kendras.includes(ve.house) && [1, 6, 11].includes(ve.position.rashiIndex)) {
     yogas.push({ name: "Malavya Yoga", description: "Venus strong in kendra — beauty, luxury, artistic talent, good spouse.", planets: ["ve"], strength: "strong", isBenefic: true });
   }
-  if (kendras.includes(sa.house) && (sa.isExalted || sa.position.rashiIndex === 9 || sa.position.rashiIndex === 10)) {
+  // Shasha: Saturn in kendra in Capricorn, Aquarius, or Libra
+  if (kendras.includes(sa.house) && [9, 10, 6].includes(sa.position.rashiIndex)) {
     yogas.push({ name: "Shasha Yoga", description: "Saturn strong in kendra — authority, discipline, success through persistence.", planets: ["sa"], strength: "strong", isBenefic: true });
+  }
+
+  // ── Chandra-Mangala Yoga: Moon + Mars conjunct or 7th from each other ─────
+  const moMaDiff = Math.abs(mo.house - ma.house);
+  if (moMaDiff === 0 || moMaDiff === 6) {
+    yogas.push({ name: "Chandra-Mangala Yoga", description: "Moon and Mars in strong relationship — financial acumen, bold and enterprising nature.", planets: ["mo", "ma"], strength: "moderate", isBenefic: true });
+  }
+
+  // ── Adhi Yoga: Mercury, Venus, Jupiter in 6th/7th/8th from Moon ──────────
+  const fromMoon = (p: PlanetInfo) => ((p.house - mo.house + 12) % 12) + 1;
+  const adhiHouses = [6, 7, 8];
+  if (adhiHouses.includes(fromMoon(me)) && adhiHouses.includes(fromMoon(ve)) && adhiHouses.includes(fromMoon(ju))) {
+    yogas.push({ name: "Adhi Yoga", description: "Benefic planets in 6/7/8 from Moon — leadership, ministerial qualities, defeat of enemies.", planets: ["me", "ve", "ju"], strength: "strong", isBenefic: true });
+  }
+
+  // ── Neecha Bhanga Raja Yoga: Debilitated planet gets cancellation ─────────
+  const debilPlanets = planets.filter(p => p.isDebilitated && !["ra", "ke"].includes(p.key));
+  for (const dp of debilPlanets) {
+    const debilLord = RASHI_LORDS[DEBILITATION[dp.key]!];
+    const lord = get(debilLord);
+    if (kendras.includes(lord.house) || trikonas.includes(lord.house)) {
+      yogas.push({ name: "Neecha Bhanga Raja Yoga", description: `${dp.name}'s debilitation is cancelled — struggles transform into strength and eventual success.`, planets: [dp.key, debilLord], strength: "moderate", isBenefic: true });
+      break;
+    }
+  }
+
+  // ── Kemadruma Yoga: Moon with no planets in 2nd or 12th ──────────────────
+  const hasNeighbor = planets.some(p =>
+    !["ra", "ke", "mo"].includes(p.key) &&
+    (p.house === ((mo.house) % 12) + 1 || p.house === ((mo.house - 2 + 12) % 12) + 1)
+  );
+  if (!hasNeighbor) {
+    yogas.push({ name: "Kemadruma Yoga", description: "Moon isolated from planets — emotional sensitivity, periods of self-reliance and introspection.", planets: ["mo"], strength: "weak", isBenefic: false });
+  }
+
+  // ── Dharma-Karmadhipati Yoga: 9th and 10th lords in conjunction ──────────
+  const lord9key = RASHI_LORDS[(lagna.rashiIndex + 8) % 12];
+  const lord10key = RASHI_LORDS[(lagna.rashiIndex + 9) % 12];
+  const lord9 = get(lord9key), lord10 = get(lord10key);
+  if (lord9.house === lord10.house && lord9key !== lord10key) {
+    yogas.push({ name: "Dharma-Karmadhipati Yoga", description: "Lords of 9th and 10th conjunct — career aligned with dharma, professional excellence and recognition.", planets: [lord9key, lord10key], strength: "strong", isBenefic: true });
+  }
+
+  // ── Viparita Raja Yoga: 6th/8th/12th lords in each other's houses ────────
+  const dusthana = [6, 8, 12];
+  const dusthanaLords = dusthana.map(h => get(RASHI_LORDS[(lagna.rashiIndex + h - 1) % 12]));
+  const allInDusthana = dusthanaLords.every(p => dusthana.includes(p.house));
+  if (allInDusthana) {
+    yogas.push({ name: "Viparita Raja Yoga", description: "Dusthana lords confined to dusthana houses — rise after adversity, unexpected success.", planets: dusthanaLords.map(p => p.key), strength: "moderate", isBenefic: true });
   }
 
   return yogas;
 }
-
 // ─── Vimshottari Dasha ────────────────────────────────────────────────────────
 
 function calcDashas(birthDate: string, moonPos: RashiPosition): DashaPeriod[] {
