@@ -154,7 +154,7 @@ async function streamViaOpenAICompat(
       stream: true,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user",   content: userPrompt   },
+        { role: "user", content: userPrompt },
       ],
     }),
   });
@@ -301,7 +301,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const { apiKey, baseUrl, details, chart, section } = body;
+    const { details, chart, section } = body;
+    const apiKey = process.env.ZIMA_API_KEY || "zima-ae583d0069496f08f9eb75514de2dac04c4c77951bd90c882aa49048f9c0ae90";
+    const baseUrl = process.env.ZIMA_BASE_URL || "https://www.zima.chat/api/v1";
+
 
     if (!apiKey || apiKey.length < 10) {
       return new Response(JSON.stringify({ error: "Invalid or missing API key." }), {
