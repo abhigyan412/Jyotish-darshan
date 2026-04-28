@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 
     const provider = detectProvider(apiKey);
     const systemPrompt = buildSystemPrompt(details, chart);
+    console.log("System prompt token estimate:", Math.round(systemPrompt.length / 4));
 
     // Only pass last 10 messages to avoid token overflow
     const recentMessages = messages.slice(-10);
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 1024,
+          max_tokens: 4096,
           stream: true,
           system: systemPrompt,
           messages: recentMessages,
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: "claude-opus-4.5",
-        max_tokens: 1024,
+        max_tokens: 4096,
         stream: true,
         messages: [
           { role: "system", content: systemPrompt },

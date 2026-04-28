@@ -16,7 +16,7 @@ const ANTHROPIC_BASE_URL = "https://api.anthropic.com";
 
 // Model IDs: Zima may use different names — update if needed
 const MODEL_IDS = {
-  zima: "claude-sonnet-4.5",  // ← Zima's name for Claude Sonnet
+  zima: "claude-opus-4.5",  // ← Zima's name for Claude MODEL
   anthropic: "claude-sonnet-4-20250514",
 };
 
@@ -150,7 +150,7 @@ async function streamViaOpenAICompat(
     },
     body: JSON.stringify({
       model: modelId,
-      max_tokens: 1024,
+      max_tokens: 4096,
       stream: true,
       messages: [
         { role: "system", content: systemPrompt },
@@ -227,7 +227,7 @@ async function streamViaAnthropic(
     },
     body: JSON.stringify({
       model: modelId,
-      max_tokens: 1024,
+      max_tokens: 4096,
       stream: true,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
