@@ -41,10 +41,6 @@ export default function InterpretationPanel({ details, chart }: Props) {
       return;
     }
 
-    const apiKey = sessionStorage.getItem("__kak");
-    const baseUrl = sessionStorage.getItem("__kbu") || undefined;
-    if (!apiKey) { setError("API key not found. Please go back and re-enter."); return; }
-
     abortRef.current?.abort();
     abortRef.current = new AbortController();
     setStreaming(true);
@@ -55,7 +51,7 @@ export default function InterpretationPanel({ details, chart }: Props) {
       const res = await fetch("/api/interpret", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ apiKey, baseUrl, details, chart, section }),
+        body: JSON.stringify({ details, chart, section }),
         signal: abortRef.current.signal,
       });
 
