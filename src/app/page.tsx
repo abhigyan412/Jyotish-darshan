@@ -177,7 +177,7 @@ export default function HomePage() {
       <footer className="text-center mt-12 text-xs italic" style={{ color: "var(--dim)" }}>
         Jyotish Darshan · Vedic Astrology 
         <br />
-        <span className="text-xs" style={{ opacity: 0.5 }}>For entertainment & reflection purposes</span>
+        <span className="text-xs" style={{ opacity: 0.5 }}></span>
       </footer>
     </div>
   );
