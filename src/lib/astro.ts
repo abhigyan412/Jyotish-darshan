@@ -482,3 +482,74 @@ export function calculateKundli(details: BirthDetails): KundliChart {
 
   return { lagna, planets, houses, dashas, yogas };
 }
+
+
+// ─── ADD THIS TO THE BOTTOM OF src/lib/astro.ts ──────────────────────────────
+// Computes today's planetary positions in the same format the salience engine
+// expects for TransitPlanetInput[]. Reuses all existing functions.
+// Call this on the client when generating a chart and pass result to API.
+
+export interface TransitSnapshot {
+  key: PlanetKey;
+  name: string;
+  rashiIndex: number;
+  rashi: string;
+  degrees: number;
+  nakshatra: string;
+  nakshatraPada: number;
+  isRetrograde: boolean;
+}
+
+/**
+ * Computes current planetary positions for transit analysis.
+ * Call this client-side when building a chart.
+ *
+ * Usage in AppPage.tsx:
+ *   const transits = calculateTransits();
+ *   // pass to API alongside chart data
+ */
+export function calculateTransits(date: Date = new Date()): TransitSnapshot[] {
+  // Build a fake "today at noon UTC" JD
+  const year  = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day   = String(date.getUTCDate()).padStart(2, "0");
+  const todayDob = `${year}-${month}-${day}`;
+  const todayTob = "12:00"; // noon UTC — good enough for slow planets (Sa/Ju/Ra/Ke)
+  const tzOffset = 0;       // UTC
+
+  const jd       = toJulianDay(todayDob, todayTob, tzOffset);
+  const d        = jd - 2451545.0;
+  const ayanamsa = getLahiriAyanamsa(jd);
+
+  const sunTropical = tropicalLongitude("su", d);
+  const sunSid      = sidereal(sunTropical, ayanamsa);
+
+  return (Object.keys(PLANET_META) as PlanetKey[]).map(key => {
+    const tropical = tropicalLongitude(key, d);
+    const sid      = sidereal(tropical, ayanamsa);
+    const pos      = toRashiPosition(sid);
+    const retro    = isRetrograde(key, d);
+
+    return {
+      key,
+      name:          PLANET_META[key].name,
+      rashiIndex:    pos.rashiIndex,
+      rashi:         pos.rashi,
+      degrees:       pos.degrees,
+      nakshatra:     pos.nakshatra,
+      nakshatraPada: pos.nakshatraPada,
+      isRetrograde:  retro,
+    };
+  });
+}
+
+// ─── ADD THIS HELPER — used in AppPage.tsx ────────────────────────────────────
+// Returns only the slow planets relevant for transit analysis.
+// Fast planets (Sun, Moon, Mercury, Venus, Mars) change too quickly
+// to be meaningful in a daily reading context — the slow ones are what matter.
+
+export function getTransitPlanets(date: Date = new Date()): TransitSnapshot[] {
+  const all = calculateTransits(date);
+  // Only slow planets for transit analysis
+  return all.filter(p => ["sa", "ju", "ra", "ke", "ma"].includes(p.key));
+}
