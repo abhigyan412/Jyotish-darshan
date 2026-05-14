@@ -4,13 +4,11 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const ZIMA_BASE_URL = "https://www.zima.chat/api/v1";
 
-// ── Test each import independently at module load time ───────────────────────
-// These will log at server startup, not per-request
-let salienceEngineOk = false;
-let contradictionsOk = false;
+let salienceEngineOk  = false;
+let contradictionsOk  = false;
 let queryClassifierOk = false;
-let contextBuilderOk = false;
-let memoryOk = false;
+let contextBuilderOk  = false;
+let memoryOk          = false;
 
 try {
   require("@/lib/contradictions");
@@ -52,38 +50,31 @@ try {
   console.error("[diag] contextBuilder.ts — CRASH:", (e as Error).message);
 }
 
-// ── Now conditionally import what's working ───────────────────────────────────
 let computeChartSignature: any = null;
-let buildSalienceContext: any = null;
-let classifyQuery: any = null;
-let QUERY_PROTOCOLS: any = null;
-let resolveModel: any = null;
-let loadMemory: any = null;
-let updateMemory: any = null;
-let scoreResponse: any = null;
+let buildSalienceContext: any  = null;
+let classifyQuery: any         = null;
+let QUERY_PROTOCOLS: any       = null;
+let resolveModel: any          = null;
+let loadMemory: any            = null;
+let updateMemory: any          = null;
 
 if (salienceEngineOk) {
   const se = require("@/lib/salienceEngine");
   computeChartSignature = se.computeChartSignature;
-  buildSalienceContext = se.buildSalienceContext;
+  buildSalienceContext  = se.buildSalienceContext;
 }
 
 if (queryClassifierOk) {
   const qc = require("@/lib/queryClassifier");
-  classifyQuery = qc.classifyQuery;
+  classifyQuery   = qc.classifyQuery;
   QUERY_PROTOCOLS = qc.QUERY_PROTOCOLS;
-  resolveModel = qc.resolveModel;
+  resolveModel    = qc.resolveModel;
 }
 
 if (memoryOk) {
   const mem = require("@/lib/memory");
-  loadMemory = mem.loadMemory;
+  loadMemory   = mem.loadMemory;
   updateMemory = mem.updateMemory;
-}
-
-if (contextBuilderOk) {
-  const cb = require("@/lib/contextBuilder");
-  scoreResponse = cb.scoreResponse;
 }
 
 function detectYear(msg: string): number | null {
@@ -116,7 +107,7 @@ export async function POST(req: NextRequest) {
       transitPlanets,
     } = await req.json();
 
-    const apiKey = process.env.ZIMA_API_KEY || "";
+    const apiKey  = process.env.ZIMA_API_KEY || "";
     const baseUrl = process.env.ZIMA_BASE_URL || ZIMA_BASE_URL;
 
     if (!apiKey) {
@@ -130,10 +121,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ─── Auth + Persistence ─────────────────────────────────────────────────
-    let userId: string | null = null;
+    // ─── Auth + Persistence ───────────────────────────────────────────────
+    let userId: string | null         = null;
     let conversationId: string | null = existingConvId ?? null;
-    let supabaseClient: any = null;
+    let supabaseClient: any           = null;
 
     try {
       supabaseClient = await createSupabaseServerClient();
@@ -148,7 +139,7 @@ export async function POST(req: NextRequest) {
           .eq("id", userId)
           .single();
 
-        const tier = profile?.tier ?? "free";
+        const tier  = profile?.tier ?? "free";
         const limits: Record<string, number> = { free: 20, basic: 100, pro: Infinity };
         const limit = limits[tier] ?? 20;
 
@@ -158,9 +149,9 @@ export async function POST(req: NextRequest) {
             const { data: conv } = await supabaseClient
               .from("conversations")
               .insert({
-                user_id: userId,
+                user_id:  userId,
                 chart_id: chartId,
-                title: firstUserMsg?.content?.slice(0, 60) ?? "New reading",
+                title:    firstUserMsg?.content?.slice(0, 60) ?? "New reading",
               })
               .select("id")
               .single();
@@ -186,9 +177,9 @@ export async function POST(req: NextRequest) {
           if (conversationId && lastUserMsg?.role === "user") {
             await supabaseClient.from("messages").insert({
               conversation_id: conversationId,
-              user_id: userId,
-              role: "user",
-              content: lastUserMsg.content,
+              user_id:         userId,
+              role:            "user",
+              content:         lastUserMsg.content,
             });
           }
         }
@@ -197,15 +188,14 @@ export async function POST(req: NextRequest) {
       console.log("AUTH BLOCK ERROR:", (e as Error).message);
     }
 
-    // ─── Build system prompt ────────────────────────────────────────────────
+    // ─── Build system prompt ──────────────────────────────────────────────
     const lastUserContent = messages[messages.length - 1]?.content ?? "";
-    const year = detectYear(lastUserContent);
+    const year            = detectYear(lastUserContent);
 
     let systemPrompt: string;
-    let modelToUse = "claude-opus-4.5";
+    let modelToUse  = "claude-sonnet-4.5";
     let chartMemory: any = null;
 
-    // Try salience pipeline if all modules loaded
     if (salienceEngineOk && queryClassifierOk && chart?.lagna && details) {
       try {
         console.log("[diag] Attempting salience pipeline...");
@@ -213,6 +203,9 @@ export async function POST(req: NextRequest) {
         // Step 1: classify
         const classification = await classifyQuery(lastUserContent, messages.slice(-6));
         console.log("[diag] classify OK:", classification.queryClass);
+
+        // Timing queries always need fresh transits — never serve from cache
+        const isTimingQuery = (classification.queryClass as string).startsWith("timing_");
 
         // Step 2: load memory
         if (memoryOk && chartId && userId) {
@@ -224,12 +217,12 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Step 3: compute signature
+        // Step 3: signature
         const lagnaRashiIndex = chart.lagna.rashiIndex ?? 0;
-        let signature: any = null;
+        let signature: any    = null;
 
-        // Try loading from DB first
-        if (supabaseClient && chartId) {
+        // Load from DB only for non-timing queries
+        if (!isTimingQuery && supabaseClient && chartId) {
           try {
             const { data: saved } = await supabaseClient
               .from("chart_salience")
@@ -239,22 +232,26 @@ export async function POST(req: NextRequest) {
 
             if (saved) {
               signature = {
-                dominantAxis: saved.dominant_axis ?? [],
+                dominantAxis:      saved.dominant_axis      ?? [],
                 planetaryPressure: saved.planetary_pressure ?? [],
-                activeHouses: saved.active_houses ?? [],
-                timingConfluence: saved.timing_confluence ?? [],
-                contradictions: saved.contradictions ?? [],
-                partnerSignature: saved.partner_signature ?? {},
-                computedAt: saved.computed_at,
-                engineVersion: saved.engine_version,
+                activeHouses:      saved.active_houses      ?? [],
+                timingConfluence:  saved.timing_confluence  ?? [],
+                contradictions:    saved.contradictions     ?? [],
+                partnerSignature:  saved.partner_signature  ?? {},
+                dashaThemes:       saved.dasha_themes       ?? [],
+                computedAt:        saved.computed_at,
+                engineVersion:     saved.engine_version,
               };
               console.log("[diag] signature loaded from DB OK");
             }
           } catch (e) {
             console.log("[diag] no saved signature, computing fresh");
           }
+        } else if (isTimingQuery) {
+          console.log("[diag] timing query — computing fresh with today's transits");
         }
 
+        // Compute fresh if not loaded from DB
         if (!signature) {
           signature = computeChartSignature(
             chart,
@@ -264,19 +261,20 @@ export async function POST(req: NextRequest) {
           );
           console.log("[diag] signature computed fresh OK, dominantAxis.length=", signature.dominantAxis?.length);
 
-          // Store async
-          if (supabaseClient && chartId) {
+          // Only cache non-timing signatures
+          if (!isTimingQuery && supabaseClient && chartId) {
             supabaseClient.from("chart_salience").upsert({
-              chart_id: chartId,
-              dominant_axis: signature.dominantAxis,
+              chart_id:           chartId,
+              dominant_axis:      signature.dominantAxis,
               planetary_pressure: signature.planetaryPressure,
-              active_houses: signature.activeHouses,
-              timing_confluence: signature.timingConfluence,
-              contradictions: signature.contradictions,
-              partner_signature: signature.partnerSignature,
-              engine_version: signature.engineVersion,
-              computed_at: signature.computedAt,
-            }).then(({ error }: any) => {
+              active_houses:      signature.activeHouses,
+              timing_confluence:  signature.timingConfluence,
+              contradictions:     signature.contradictions,
+              partner_signature:  signature.partnerSignature,
+              dasha_themes:       (signature as any).dashaThemes ?? [],
+              engine_version:     signature.engineVersion,
+              computed_at:        signature.computedAt,
+            }, { onConflict: "chart_id" }).then(({ error }: any) => {
               if (error) console.log("[diag] salience save error:", error.message);
             });
           }
@@ -290,7 +288,7 @@ export async function POST(req: NextRequest) {
         );
         console.log("[diag] salienceContext built, length=", salienceContext?.length);
 
-        const protocol = QUERY_PROTOCOLS[classification.queryClass];
+        const protocol    = QUERY_PROTOCOLS[classification.queryClass];
         const yearlyProto = year ? buildYearlyPredictionProtocol(year) : "";
 
         let memoryContext = "";
@@ -306,22 +304,25 @@ export async function POST(req: NextRequest) {
         systemPrompt = [
           buildVoicePrompt(),
           salienceContext,
-          protocol ? `\n── ACTIVE PROTOCOL: ${classification.queryClass.toUpperCase()} ──\n${protocol}` : "",
-          memoryContext ? `\n── CHART MEMORY ──\n${memoryContext}` : "",
+          protocol
+            ? `\n── ACTIVE PROTOCOL: ${classification.queryClass.toUpperCase()} ──\n${protocol}`
+            : "",
+          memoryContext
+            ? `\n── CHART MEMORY ──\n${memoryContext}\n\nINSTRUCTION: This person has had previous readings. Do NOT repeat observations already confirmed above. Build on what landed. Go one level deeper on confirmed themes. Introduce at least one observation they have not heard before.`
+            : "",
           yearlyProto || "",
-          `\n\n── OUTPUT RULES ──\nNEVER say planet names, house numbers, Sanskrit terms unless user asks for technical analysis.\nNEVER produce generic observations.\nALWAYS include a behavioral contradiction.\nTranslate everything into behavioral patterns and emotional textures.`,
+          `\n\n── OUTPUT RULES ──\nNEVER say planet names, house numbers, Sanskrit terms unless user explicitly asks for technical analysis.\nNEVER produce generic observations. Every statement must be specific enough that a different person would say "that's not me."\nALWAYS include at least one behavioral contradiction — two genuine drives that collide in real life.\nTranslate everything into behavioral patterns, emotional textures, and qualities of time.`,
         ].filter(Boolean).join("\n\n");
 
         modelToUse = resolveModel(classification.modelTier);
         console.log(`[diag] FULL PIPELINE OK — model=${modelToUse} prompt.length=${systemPrompt.length}`);
 
       } catch (e) {
-        // Pipeline crashed — fall back to safe path
         console.error("[diag] PIPELINE RUNTIME CRASH:", (e as Error).message, "\n", (e as Error).stack);
 
-        const voicePrompt = buildVoicePrompt();
+        const voicePrompt  = buildVoicePrompt();
         const chartContext = buildChartContext(details, chart);
-        const yearlyProto = year ? buildYearlyPredictionProtocol(year) : "";
+        const yearlyProto  = year ? buildYearlyPredictionProtocol(year) : "";
 
         systemPrompt = [
           voicePrompt,
@@ -329,39 +330,38 @@ export async function POST(req: NextRequest) {
           yearlyProto,
         ].filter(Boolean).join("\n\n");
 
-        modelToUse = "claude-opus-4.5";
+        modelToUse = "claude-sonnet-4.5";
         console.log("[diag] Fell back to safe path — prompt.length=", systemPrompt.length);
       }
 
     } else {
-      // Safe path — pipeline modules not loaded
       console.log("[diag] Pipeline modules not all loaded, using safe path");
-      console.log(`[diag] salienceOk=${salienceEngineOk} classifierOk=${queryClassifierOk} chart.lagna=${!!chart?.lagna}`);
 
-      const voicePrompt = buildVoicePrompt();
+      const voicePrompt  = buildVoicePrompt();
       const chartContext = chart && details ? buildChartContext(details, chart) : "";
-      const yearlyProto = year ? buildYearlyPredictionProtocol(year) : "";
+      const yearlyProto  = year ? buildYearlyPredictionProtocol(year) : "";
 
       systemPrompt = [
         voicePrompt,
-        chartContext ? `\n\nYOUR PRIVATE NOTES:\n${chartContext}\n\nTranslate into human experience. Never quote directly.` : "",
+        chartContext
+          ? `\n\nYOUR PRIVATE NOTES:\n${chartContext}\n\nTranslate into human experience. Never quote directly.`
+          : "",
         yearlyProto,
       ].filter(Boolean).join("\n\n");
 
-      modelToUse = "claude-opus-4.5";
+      modelToUse = "claude-sonnet-4.5";
     }
 
     const persistArgs: PersistArgs = {
       userId,
       conversationId,
-      chartId: chartId ?? null,
-      queryClass: classifyQueryLocal(lastUserContent),
+      chartId:     chartId ?? null,
+      queryClass:  classifyQueryLocal(lastUserContent),
       userMessage: lastUserContent,
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
       supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
     };
 
-    // ─── Stream ─────────────────────────────────────────────────────────────
     console.log(`[diag] Calling Zima — model=${modelToUse}`);
     console.log("[timing] pre-Zima:", Date.now() - startTime, "ms");
 
@@ -369,12 +369,12 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization:  `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: modelToUse,
+        model:      modelToUse,
         max_tokens: 1200,
-        stream: true,
+        stream:     true,
         messages: [
           { role: "system", content: systemPrompt },
           ...messages.slice(-10),
@@ -404,32 +404,32 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ─── Persist ─────────────────────────────────────────────────────────────────
+// ─── Persist ──────────────────────────────────────────────────────────────────
 
 async function saveAssistantReply(
-  fullText: string,
-  userId: string | null,
+  fullText:       string,
+  userId:         string | null,
   conversationId: string | null,
-  chartId: string | null,
-  queryClass: string,
-  userMessage: string,
-  supabaseUrl: string,
-  supabaseKey: string
+  chartId:        string | null,
+  queryClass:     string,
+  userMessage:    string,
+  supabaseUrl:    string,
+  supabaseKey:    string
 ) {
   if (!userId || !conversationId || !fullText) return;
+
   try {
     const { createClient } = await import("@supabase/supabase-js");
     const db = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
     await db.from("messages").insert({
       conversation_id: conversationId,
-      user_id: userId,
-      role: "assistant",
-      content: fullText,
+      user_id:         userId,
+      role:            "assistant",
+      content:         fullText,
     });
   } catch (e) {
     console.log("SAVE ERROR:", (e as Error).message);
   }
-
 
   if (chartId && userId && fullText) {
     try {
@@ -439,7 +439,7 @@ async function saveAssistantReply(
         userId,
         userMessage,
         assistantResponse: fullText,
-        queryClass: queryClass as any,
+        queryClass:        queryClass as any,
       });
       console.log("[memory] updated OK");
     } catch (e) {
@@ -449,14 +449,16 @@ async function saveAssistantReply(
 }
 
 type PersistArgs = {
-  userId: string | null;
+  userId:         string | null;
   conversationId: string | null;
-  chartId: string | null;
-  queryClass: string;
-  userMessage: string;
-  supabaseUrl: string;
-  supabaseKey: string;
+  chartId:        string | null;
+  queryClass:     string;
+  userMessage:    string;
+  supabaseUrl:    string;
+  supabaseKey:    string;
 };
+
+// ─── Stream ────────────────────────────────────────────────────────────────────
 
 function streamOpenAI(res: Response, persist: PersistArgs): Response {
   const encoder = new TextEncoder();
@@ -467,7 +469,7 @@ function streamOpenAI(res: Response, persist: PersistArgs): Response {
       const reader = res.body?.getReader();
       if (!reader) { controller.close(); return; }
 
-      let buffer = "";
+      let buffer   = "";
       let fullText = "";
 
       try {
@@ -487,11 +489,11 @@ function streamOpenAI(res: Response, persist: PersistArgs): Response {
                 fullText,
                 persist.userId,
                 persist.conversationId,
-                persist.chartId,        // ← 4th
-                persist.queryClass,     // ← 5th
-                persist.userMessage,    // ← 6th
-                persist.supabaseUrl,    // ← 7th
-                persist.supabaseKey,    // ← 8th
+                persist.chartId,
+                persist.queryClass,
+                persist.userMessage,
+                persist.supabaseUrl,
+                persist.supabaseKey,
               );
               controller.close();
               return;
@@ -499,7 +501,7 @@ function streamOpenAI(res: Response, persist: PersistArgs): Response {
             if (!data) continue;
             try {
               const parsed = JSON.parse(data);
-              const text = parsed.choices?.[0]?.delta?.content ?? "";
+              const text   = parsed.choices?.[0]?.delta?.content ?? "";
               if (text) {
                 fullText += text;
                 controller.enqueue(encoder.encode(text));
@@ -514,11 +516,11 @@ function streamOpenAI(res: Response, persist: PersistArgs): Response {
             fullText,
             persist.userId,
             persist.conversationId,
-            persist.chartId,        // ← 4th
-            persist.queryClass,     // ← 5th
-            persist.userMessage,    // ← 6th
-            persist.supabaseUrl,    // ← 7th
-            persist.supabaseKey,    // ← 8th
+            persist.chartId,
+            persist.queryClass,
+            persist.userMessage,
+            persist.supabaseUrl,
+            persist.supabaseKey,
           );
         } else {
           console.error("[stream] EMPTY — Zima returned no content");
