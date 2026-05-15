@@ -36,15 +36,11 @@ function formatText(text: string): string {
 
 function FeedbackButtons({
   messageIndex,
-  messageContent,
-  chartId,
   feedbackState,
   onFeedback,
   isStreaming,
 }: {
   messageIndex: number;
-  messageContent: string;
-  chartId?: string | null;
   feedbackState: FeedbackState;
   onFeedback: (index: number, signal: "accurate" | "off" | "more") => void;
   isStreaming: boolean;
@@ -53,7 +49,11 @@ function FeedbackButtons({
 
   const current = feedbackState[messageIndex];
 
-  const buttons: { signal: "accurate" | "off" | "more"; label: string; activeColor: string }[] = [
+  const buttons: {
+    signal: "accurate" | "off" | "more";
+    label: string;
+    activeColor: string;
+  }[] = [
     { signal: "accurate", label: "✓ This landed",  activeColor: "rgba(74,180,100,0.2)"  },
     { signal: "more",     label: "↓ Tell me more", activeColor: "rgba(201,168,76,0.2)"  },
     { signal: "off",      label: "✗ This missed",  activeColor: "rgba(180,74,74,0.2)"   },
@@ -123,6 +123,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
   const bottomRef                            = useRef<HTMLDivElement>(null);
   const sendingRef                           = useRef(false);
 
+  // ── Load conversation history ────────────────────────────────────────────
   useEffect(() => {
     if (!chartId || historyLoaded) return;
     async function loadHistory() {
@@ -155,39 +156,15 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleFeedback = useCallback(async (
-    messageIndex: number,
-    signal: "accurate" | "off" | "more"
+  // ── Core stream executor — used by both sendMessage and "Tell me more" ──
+  const executeStream = useCallback(async (
+    userContent: string,
+    baseMessages: Message[]
   ) => {
-    setFeedbackState(prev => ({ ...prev, [messageIndex]: signal }));
-
-    if (!chartId) return;
-
-    const msg = messages[messageIndex];
-    const observationText = msg?.content
-      .replace(/<[^>]+>/g, "")
-      .split(/[.!?]/)[0]
-      ?.trim()
-      ?.slice(0, 200) ?? "";
-
-    try {
-      await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chartId, signal, observationText }),
-      });
-    } catch { /* best-effort */ }
-  }, [messages, chartId]);
-
-  const sendMessage = useCallback(async () => {
-    if (!input.trim() || loading || sendingRef.current) return;
-    sendingRef.current = true;
-
-    const userMsg: Message = { role: "user", content: input.trim() };
-    const currentMessages  = [...messages, userMsg];
+    const userMsg: Message    = { role: "user", content: userContent };
+    const currentMessages     = [...baseMessages, userMsg];
 
     setMessages(currentMessages);
-    setInput("");
     setLoading(true);
 
     try {
@@ -254,13 +231,76 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
           };
           return updated;
         }
-        return [...prev, { role: "assistant", content: "⚠ Error: " + (err as Error).message }];
+        return [...prev, {
+          role: "assistant",
+          content: "⚠ Error: " + (err as Error).message,
+        }];
       });
     } finally {
       setLoading(false);
       sendingRef.current = false;
     }
-  }, [input, loading, messages, details, chart, chartId, convId, transitPlanets]);
+  }, [details, chart, chartId, convId, transitPlanets]);
+
+  // ── Send message (from input box) ────────────────────────────────────────
+  const sendMessage = useCallback(async () => {
+    if (!input.trim() || loading || sendingRef.current) return;
+    sendingRef.current = true;
+    const content = input.trim();
+    setInput("");
+    await executeStream(content, messages);
+  }, [input, loading, messages, executeStream]);
+
+  // ── Feedback handler ─────────────────────────────────────────────────────
+  const handleFeedback = useCallback(async (
+    messageIndex: number,
+    signal: "accurate" | "off" | "more"
+  ) => {
+    // Mark button as active immediately
+    setFeedbackState(prev => ({ ...prev, [messageIndex]: signal }));
+
+    // "Tell me more" — fire a deep follow-up automatically
+    if (signal === "more") {
+      if (loading || sendingRef.current) return;
+      sendingRef.current = true;
+
+      const msg = messages[messageIndex];
+
+      // Extract a specific sentence from the response to drill into
+      const plainText = msg?.content.replace(/<[^>]+>/g, "") ?? "";
+      const sentences = plainText
+        .split(/(?<=[.!?])\s+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 30 && s.length < 200);
+
+      // Pick the most interesting sentence (not the first — often a header)
+      const targetSentence = sentences[1] ?? sentences[0] ?? plainText.slice(0, 100);
+
+      const followUp = targetSentence
+        ? `Go deeper on this specifically: "${targetSentence.slice(0, 120)}"`
+        : "Go deeper. Give me more specific observations about what you just described.";
+
+      await executeStream(followUp, messages);
+    }
+
+    // Record feedback signal to memory (best-effort)
+    if (!chartId) return;
+    const msg = messages[messageIndex];
+    const observationText = msg?.content
+      .replace(/<[^>]+>/g, "")
+      .split(/[.!?]/)[0]
+      ?.trim()
+      ?.slice(0, 200) ?? "";
+
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chartId, signal, observationText }),
+      });
+    } catch { /* best-effort */ }
+
+  }, [messages, chartId, loading, executeStream]);
 
   return (
     <>
@@ -271,6 +311,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
 
       <div className="flex flex-col" style={{ height: 560 }}>
 
+        {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-1 mb-4">
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -304,12 +345,10 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
                         className="chat-prose"
                         dangerouslySetInnerHTML={{ __html: formatText(m.content) }}
                       />
-                      {/* Feedback — show under all assistant messages except welcome */}
+                      {/* Feedback buttons under every assistant message except welcome */}
                       {i > 0 && (
                         <FeedbackButtons
                           messageIndex={i}
-                          messageContent={m.content}
-                          chartId={chartId}
                           feedbackState={feedbackState}
                           onFeedback={handleFeedback}
                           isStreaming={streamingIndex === i}
@@ -330,6 +369,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
           <div ref={bottomRef} />
         </div>
 
+        {/* Suggested questions — only on first message */}
         {messages.length === 1 && (
           <div className="flex flex-wrap gap-2 mb-3">
             {[
@@ -367,6 +407,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
           </div>
         )}
 
+        {/* Input */}
         <div className="flex gap-2">
           <input
             className="mystic-input flex-1"
