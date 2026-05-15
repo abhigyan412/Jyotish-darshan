@@ -7,6 +7,10 @@ interface Message {
   content: string;
 }
 
+interface FeedbackState {
+  [messageIndex: number]: "accurate" | "off" | "more" | null;
+}
+
 interface Props {
   details: BirthDetails;
   chart: KundliChart;
@@ -30,23 +34,95 @@ function formatText(text: string): string {
     .join("");
 }
 
-export default function ChartChat({ details, chart, chartId , transitPlanets  }: Props) {
+function FeedbackButtons({
+  messageIndex,
+  messageContent,
+  chartId,
+  feedbackState,
+  onFeedback,
+  isStreaming,
+}: {
+  messageIndex: number;
+  messageContent: string;
+  chartId?: string | null;
+  feedbackState: FeedbackState;
+  onFeedback: (index: number, signal: "accurate" | "off" | "more") => void;
+  isStreaming: boolean;
+}) {
+  if (isStreaming) return null;
+
+  const current = feedbackState[messageIndex];
+
+  const buttons: { signal: "accurate" | "off" | "more"; label: string; activeColor: string }[] = [
+    { signal: "accurate", label: "✓ This landed",  activeColor: "rgba(74,180,100,0.2)"  },
+    { signal: "more",     label: "↓ Tell me more", activeColor: "rgba(201,168,76,0.2)"  },
+    { signal: "off",      label: "✗ This missed",  activeColor: "rgba(180,74,74,0.2)"   },
+  ];
+
+  return (
+    <div style={{
+      display:    "flex",
+      gap:        5,
+      marginTop:  10,
+      paddingTop: 8,
+      borderTop:  "0.5px solid rgba(201,168,76,0.08)",
+      flexWrap:   "wrap",
+    }}>
+      {buttons.map(({ signal, label, activeColor }) => {
+        const isActive = current === signal;
+        return (
+          <button
+            key={signal}
+            onClick={() => onFeedback(messageIndex, signal)}
+            style={{
+              fontSize:      10,
+              padding:       "3px 10px",
+              borderRadius:  12,
+              border:        `0.5px solid ${isActive ? "rgba(201,168,76,0.45)" : "rgba(201,168,76,0.12)"}`,
+              background:    isActive ? activeColor : "transparent",
+              color:         isActive ? "var(--gold)" : "var(--dim)",
+              cursor:        "pointer",
+              transition:    "all 0.15s",
+              fontFamily:    "inherit",
+              letterSpacing: 0.3,
+            }}
+            onMouseEnter={e => {
+              if (!isActive) {
+                e.currentTarget.style.borderColor = "rgba(201,168,76,0.3)";
+                e.currentTarget.style.color = "var(--muted)";
+              }
+            }}
+            onMouseLeave={e => {
+              if (!isActive) {
+                e.currentTarget.style.borderColor = "rgba(201,168,76,0.12)";
+                e.currentTarget.style.color = "var(--dim)";
+              }
+            }}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function ChartChat({ details, chart, chartId, transitPlanets }: Props) {
   const welcomeMsg: Message = {
     role: "assistant",
     content: `Namaste! I am your Jyotish guide. I have studied ${details.name || "your"} birth chart carefully — Lagna in ${chart.lagna.rashi}, Moon in ${chart.planets.find(p => p.key === "mo")?.position.rashi}. Ask me anything about your chart, destiny, career, relationships, or remedies.`,
   };
 
-  const [messages, setMessages]         = useState<Message[]>([welcomeMsg]);
-  const [input, setInput]               = useState("");
-  const [loading, setLoading]           = useState(false);
-  const [convId, setConvId]             = useState<string | null>(null);
-  const [historyLoaded, setHistoryLoaded] = useState(false);
-  const bottomRef                        = useRef<HTMLDivElement>(null);
+  const [messages, setMessages]             = useState<Message[]>([welcomeMsg]);
+  const [input, setInput]                   = useState("");
+  const [loading, setLoading]               = useState(false);
+  const [convId, setConvId]                 = useState<string | null>(null);
+  const [historyLoaded, setHistoryLoaded]   = useState(false);
+  const [feedbackState, setFeedbackState]   = useState<FeedbackState>({});
+  const [streamingIndex, setStreamingIndex] = useState<number | null>(null);
+  const bottomRef                            = useRef<HTMLDivElement>(null);
+  const sendingRef                           = useRef(false);
 
-  // ── FIX 1: guard against double-send ────────────────────────────────────
-  const sendingRef = useRef(false);
-
-  // ── Load previous messages ───────────────────────────────────────────────
   useEffect(() => {
     if (!chartId || historyLoaded) return;
     async function loadHistory() {
@@ -69,11 +145,8 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
             })),
           ]);
         }
-      } catch {
-        // silent
-      } finally {
-        setHistoryLoaded(true);
-      }
+      } catch { /* silent */ }
+      finally { setHistoryLoaded(true); }
     }
     loadHistory();
   }, [chartId]);
@@ -82,18 +155,40 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ── FIX 2: useCallback + sendingRef prevents triple-fire ────────────────
+  const handleFeedback = useCallback(async (
+    messageIndex: number,
+    signal: "accurate" | "off" | "more"
+  ) => {
+    setFeedbackState(prev => ({ ...prev, [messageIndex]: signal }));
+
+    if (!chartId) return;
+
+    const msg = messages[messageIndex];
+    const observationText = msg?.content
+      .replace(/<[^>]+>/g, "")
+      .split(/[.!?]/)[0]
+      ?.trim()
+      ?.slice(0, 200) ?? "";
+
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chartId, signal, observationText }),
+      });
+    } catch { /* best-effort */ }
+  }, [messages, chartId]);
+
   const sendMessage = useCallback(async () => {
     if (!input.trim() || loading || sendingRef.current) return;
     sendingRef.current = true;
 
     const userMsg: Message = { role: "user", content: input.trim() };
-    const currentMessages = [...messages, userMsg];
+    const currentMessages  = [...messages, userMsg];
 
     setMessages(currentMessages);
     setInput("");
     setLoading(true);
-    console.log("[client] transitPlanets being sent:", transitPlanets?.length ?? 0);
 
     try {
       const res = await fetch("/api/chat", {
@@ -102,41 +197,28 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
         body: JSON.stringify({
           details,
           chart,
-          messages: currentMessages,
+          messages:       currentMessages,
           chartId:        chartId ?? undefined,
           conversationId: convId  ?? undefined,
           transitPlanets: transitPlanets ?? [],
         }),
       });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText);
-      }
-
-      if (!res.body) {
-        throw new Error("No response body — stream unavailable");
-      }
+      if (!res.ok) throw new Error(await res.text());
+      if (!res.body) throw new Error("No response body");
 
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();
       let full      = "";
 
-      // Add empty assistant message to stream into
+      const newAssistantIndex = currentMessages.length;
       setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+      setStreamingIndex(newAssistantIndex);
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        full += chunk;
-
-        // ── FIX 3: debug chunk content in dev ─────────────────────────
-        if (process.env.NODE_ENV === "development" && chunk) {
-          console.log("[stream chunk]", JSON.stringify(chunk.slice(0, 80)));
-        }
-
+        full += decoder.decode(value, { stream: true });
         setMessages(prev => {
           const updated = [...prev];
           updated[updated.length - 1] = { role: "assistant", content: full };
@@ -144,28 +226,26 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
         });
       }
 
-      // ── FIX 4: if full is empty after stream, show diagnostic ────────
+      setStreamingIndex(null);
+
       if (!full || full.trim().length < 5) {
-        console.error("[stream] Empty or near-empty response. full=", JSON.stringify(full));
         setMessages(prev => {
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: "assistant",
-            content: "⚠ The reading came back empty. This usually means the system prompt failed to build. Check server logs for errors in the salience pipeline.",
+            content: "⚠ The reading came back empty. Please try again.",
           };
           return updated;
         });
       }
 
-      // Save convId from response header if server set one
       const newConvId = res.headers.get("x-conversation-id");
       if (newConvId && !convId) setConvId(newConvId);
 
     } catch (err) {
-      console.error("[chat] sendMessage error:", err);
+      setStreamingIndex(null);
       setMessages(prev => {
         const last = prev[prev.length - 1];
-        // Replace empty assistant bubble if it exists, else append
         if (last?.role === "assistant" && !last.content) {
           const updated = [...prev];
           updated[updated.length - 1] = {
@@ -180,7 +260,7 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
       setLoading(false);
       sendingRef.current = false;
     }
-  }, [input, loading, messages, details, chart, chartId, convId]);
+  }, [input, loading, messages, details, chart, chartId, convId, transitPlanets]);
 
   return (
     <>
@@ -191,7 +271,6 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
 
       <div className="flex flex-col" style={{ height: 560 }}>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-3 pr-1 mb-4">
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -207,22 +286,36 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
               }}>
                 {m.role === "assistant" && (
                   <div style={{
-                    fontSize:    9,
-                    color:       "var(--gold)",
-                    fontFamily:  "Cinzel Decorative, serif",
+                    fontSize:      9,
+                    color:         "var(--gold)",
+                    fontFamily:    "Cinzel Decorative, serif",
                     letterSpacing: 1.5,
-                    marginBottom: 8,
-                    opacity:     0.8,
+                    marginBottom:  8,
+                    opacity:       0.8,
                   }}>
                     ✦ JYOTISH GUIDE
                   </div>
                 )}
+
                 {m.role === "assistant" ? (
                   m.content ? (
-                    <div
-                      className="chat-prose"
-                      dangerouslySetInnerHTML={{ __html: formatText(m.content) }}
-                    />
+                    <>
+                      <div
+                        className="chat-prose"
+                        dangerouslySetInnerHTML={{ __html: formatText(m.content) }}
+                      />
+                      {/* Feedback — show under all assistant messages except welcome */}
+                      {i > 0 && (
+                        <FeedbackButtons
+                          messageIndex={i}
+                          messageContent={m.content}
+                          chartId={chartId}
+                          feedbackState={feedbackState}
+                          onFeedback={handleFeedback}
+                          isStreaming={streamingIndex === i}
+                        />
+                      )}
+                    </>
                   ) : loading && i === messages.length - 1 ? (
                     <span style={{ color: "var(--dim)", fontStyle: "italic" }}>
                       reading the stars…
@@ -237,7 +330,6 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
           <div ref={bottomRef} />
         </div>
 
-        {/* Suggested questions */}
         {messages.length === 1 && (
           <div className="flex flex-wrap gap-2 mb-3">
             {[
@@ -251,14 +343,14 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
                 key={q}
                 onClick={() => setInput(q)}
                 style={{
-                  fontSize:   12,
-                  padding:    "5px 12px",
-                  background: "var(--surface2)",
-                  border:     "0.5px solid rgba(201,168,76,0.22)",
+                  fontSize:     12,
+                  padding:      "5px 12px",
+                  background:   "var(--surface2)",
+                  border:       "0.5px solid rgba(201,168,76,0.22)",
                   borderRadius: 20,
-                  color:      "var(--muted)",
-                  cursor:     "pointer",
-                  transition: "border-color 0.15s, color 0.15s",
+                  color:        "var(--muted)",
+                  cursor:       "pointer",
+                  transition:   "border-color 0.15s, color 0.15s",
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.borderColor = "rgba(201,168,76,0.6)";
@@ -275,7 +367,6 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
           </div>
         )}
 
-        {/* Input */}
         <div className="flex gap-2">
           <input
             className="mystic-input flex-1"
@@ -284,7 +375,7 @@ export default function ChartChat({ details, chart, chartId , transitPlanets  }:
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault(); // prevent form submit / double fire
+                e.preventDefault();
                 sendMessage();
               }
             }}
