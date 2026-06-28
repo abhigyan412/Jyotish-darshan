@@ -39,6 +39,7 @@ export default function InterpretationPanel({ details, chart }: Props) {
   const [streaming, setStreaming] = useState(false);
   const [currentText, setCurrentText] = useState("");
   const [error, setError] = useState("");
+  const [authRequired, setAuthRequired] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchInterpretation = useCallback(async (section: InterpretationSection) => {
@@ -52,6 +53,7 @@ export default function InterpretationPanel({ details, chart }: Props) {
     setStreaming(true);
     setCurrentText("");
     setError("");
+    setAuthRequired(false);
 
     try {
       const res = await fetch("/api/interpret", {
@@ -63,6 +65,10 @@ export default function InterpretationPanel({ details, chart }: Props) {
 
       if (!res.ok) {
         const err = await res.json();
+        if (err.authRequired) {
+          setAuthRequired(true);
+          return;
+        }
         throw new Error(err.error || "API error");
       }
 
@@ -95,6 +101,56 @@ export default function InterpretationPanel({ details, chart }: Props) {
 
   const displayText = cache[activeSection] || currentText;
 
+  if (authRequired) {
+    return (
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "4rem 2rem",
+        textAlign: "center",
+        gap: "1.5rem",
+      }}>
+        <div style={{ fontSize: "2rem", color: "var(--gold)" }}>{"✦"}</div>
+        <div style={{
+          fontFamily: "Cinzel Decorative, serif",
+          fontSize: "0.9rem",
+          color: "var(--gold)",
+          letterSpacing: 2,
+        }}>
+          Sign In to Access AI Readings
+        </div>
+        <p style={{
+          fontSize: "0.9rem",
+          color: "#C4BEDD",
+          maxWidth: 320,
+          lineHeight: 1.7,
+        }}>
+          Create a free account to unlock AI-powered Kundli interpretations, chart chat, and personalized insights.
+        </p>
+        <a
+          href="/sign-in"
+          style={{
+            fontFamily: "Cinzel, serif",
+            fontSize: "0.72rem",
+            letterSpacing: "2px",
+            textTransform: "uppercase" as const,
+            color: "#07060F",
+            background: "var(--gold)",
+            padding: "0.75rem 2rem",
+            borderRadius: "4px",
+            textDecoration: "none",
+            display: "inline-block",
+            transition: "opacity 0.2s",
+          }}
+        >
+          Sign In Free
+        </a>
+      </div>
+    );
+  }
+
   return (
     <>
       <style>{`
@@ -102,7 +158,6 @@ export default function InterpretationPanel({ details, chart }: Props) {
         .interp-prose p:last-child { margin-bottom: 0; }
       `}</style>
 
-      {/* Section tabs */}
       <div className="flex flex-wrap gap-2 mb-5">
         {SECTIONS.map(s => (
           <button
@@ -124,27 +179,27 @@ export default function InterpretationPanel({ details, chart }: Props) {
         ))}
       </div>
 
-      {/* Content area */}
       <div className="min-h-[300px]">
 
-        {/* Error */}
         {error && (
-          <div className="text-sm p-4 rounded-lg" style={{ background: "rgba(226,75,74,0.1)", border: "0.5px solid rgba(226,75,74,0.3)", color: "#E24B4A" }}>
-            ⚠ {error}
+          <div className="text-sm p-4 rounded-lg" style={{
+            background: "rgba(226,75,74,0.1)",
+            border: "0.5px solid rgba(226,75,74,0.3)",
+            color: "#E24B4A",
+          }}>
+            {"⚠"} {error}
           </div>
         )}
 
-        {/* Loading */}
         {!error && !displayText && streaming && (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div className="text-3xl animate-rotateSlow">✦</div>
-            <div className="text-sm italic animate-pulse-slow" style={{ color: "var(--muted)" }}>
-              The stars are speaking…
+            <div className="text-3xl animate-rotateSlow">{"✦"}</div>
+            <div className="text-sm animate-pulse-slow" style={{ color: "#C4BEDD" }}>
+              The stars are speaking
             </div>
           </div>
         )}
 
-        {/* Response — same bubble style as ChartChat assistant messages */}
         {displayText && (
           <div style={{
             padding: "18px 20px",
@@ -155,7 +210,6 @@ export default function InterpretationPanel({ details, chart }: Props) {
             lineHeight: 1.75,
             color: "var(--text)",
           }}>
-            {/* Header */}
             <div style={{
               fontSize: 9,
               color: "var(--gold)",
@@ -164,16 +218,14 @@ export default function InterpretationPanel({ details, chart }: Props) {
               marginBottom: 12,
               opacity: 0.8,
             }}>
-              ✦ JYOTISH GUIDE — {SECTIONS.find(s => s.key === activeSection)?.label.toUpperCase()}
+              {"✦"} JYOTISH GUIDE — {SECTIONS.find(s => s.key === activeSection)?.label.toUpperCase()}
             </div>
 
-            {/* Formatted content */}
             <div
               className="interp-prose"
               dangerouslySetInnerHTML={{ __html: formatText(displayText) }}
             />
 
-            {/* Streaming cursor */}
             {streaming && !cache[activeSection] && (
               <span style={{
                 display: "inline-block",
@@ -189,7 +241,6 @@ export default function InterpretationPanel({ details, chart }: Props) {
         )}
       </div>
 
-      {/* Regenerate */}
       {!streaming && displayText && (
         <button
           onClick={() => {
@@ -197,10 +248,10 @@ export default function InterpretationPanel({ details, chart }: Props) {
             setCurrentText("");
             fetchInterpretation(activeSection);
           }}
-          className="mt-4 text-xs italic"
-          style={{ color: "var(--dim)", background: "none", border: "none", cursor: "pointer" }}
+          className="mt-4 text-xs"
+          style={{ color: "#9E96B8", background: "none", border: "none", cursor: "pointer" }}
         >
-          ↺ Regenerate
+          Regenerate
         </button>
       )}
 

@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { BirthDetails, KundliChart } from "@/types";
-import {   } from "@/lib/astro";
-import { calculateKundli , getTransitPlanets } from "@/lib/astro";
+import { } from "@/lib/astro";
+import { calculateKundli, getTransitPlanets } from "@/lib/astro";
 import BirthForm from "@/components/BirthForm";
 import KundliChartSVG from "@/components/KundliChart";
 import PlanetTable from "@/components/PlanetTable";
@@ -10,32 +10,45 @@ import DashaTimeline from "@/components/DashaTimeline";
 import InterpretationPanel from "@/components/InterpretationPanel";
 import YogaCards from "@/components/YogaCards";
 import ChartChat from "@/components/ChartChat";
+import UpgradeModal from "@/components/UpgradeModal";
+import MyCharts from "@/components/MyCharts";
 
 type Tab = "chart" | "planets" | "yogas" | "dasha" | "interpretation" | "chat";
 
 const TABS: { key: Tab; label: string; icon: string }[] = [
-  { key: "chart",          label: "Chart",      icon: "⬡" },
-  { key: "planets",        label: "Planets",    icon: "☽" },
-  { key: "yogas",          label: "Yogas",      icon: "✦" },
-  { key: "dasha",          label: "Dasha",      icon: "♄" },
+  { key: "chart", label: "Chart", icon: "⬡" },
+  { key: "planets", label: "Planets", icon: "☽" },
+  { key: "yogas", label: "Yogas", icon: "✦" },
+  { key: "dasha", label: "Dasha", icon: "♄" },
   { key: "interpretation", label: "AI Reading", icon: "☉" },
-  { key: "chat",           label: "Ask Chart",  icon: "💬" },
+  { key: "chat", label: "Ask Chart", icon: "💬" },
 ];
 
 export default function AppPage() {
-  const [step, setStep]           = useState<"form" | "result">("form");
-  const [details, setDetails]     = useState<BirthDetails | null>(null);
-  const [chart, setChart]         = useState<KundliChart | null>(null);
-  const [loading, setLoading]     = useState(false);
+  const [step, setStep] = useState<"form" | "result">("form");
+  const [details, setDetails] = useState<BirthDetails | null>(null);
+  const [chart, setChart] = useState<KundliChart | null>(null);
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("chart");
-  const [chartId, setChartId]     = useState<string | null>(null);
+  const [chartId, setChartId] = useState<string | null>(null);
   const [transitPlanets, setTransitPlanets] = useState<any[]>([]);
-
-  // ── KEY FIX: track which tabs have ever been visited ────────────────────
-  // A tab only mounts when first visited. After that it stays mounted
-  // (display:none) so state is preserved — but InterpretationPanel only
-  // fires its fetch when the user actually clicks that tab.
+  const [upgradeModal, setUpgradeModal] = useState<{
+    reason: string;
+    limitType: "message" | "chart" | "feature";
+  } | null>(null);
   const [mountedTabs, setMountedTabs] = useState<Set<Tab>>(new Set(["chart"]));
+
+  // Auto-open upgrade modal if coming from pricing page
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get("upgrade");
+    if (plan === "basic" || plan === "pro") {
+      setUpgradeModal({
+        reason: `Upgrade to ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan to unlock full access.`,
+        limitType: "feature",
+      });
+    }
+  }, []);
 
   function handleTabChange(tab: Tab) {
     setActiveTab(tab);
@@ -44,13 +57,12 @@ export default function AppPage() {
 
   async function handleGenerate(d: BirthDetails) {
     setLoading(true);
-    // Reset mounted tabs on new chart so InterpretationPanel re-fetches
     setMountedTabs(new Set(["chart"]));
     setActiveTab("chart");
 
     try {
       const c = calculateKundli(d);
-      const transits = getTransitPlanets(); // today's slow planet positions
+      const transits = getTransitPlanets();
       setTransitPlanets(transits);
       setDetails(d);
       setChart(c);
@@ -66,13 +78,13 @@ export default function AppPage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              name:      d.name || "My Chart",
-              dob:       d.dob,
-              tob:       d.tob,
-              pob:       d.pob,
-              latitude:  d.lat,
+              name: d.name || "My Chart",
+              dob: d.dob,
+              tob: d.tob,
+              pob: d.pob,
+              latitude: d.lat,
               longitude: d.lon,
-              timezone:  String(d.timezone),
+              timezone: String(d.timezone),
               chart_data: c,
               is_primary: false,
             }),
@@ -80,6 +92,14 @@ export default function AppPage() {
           if (res.ok) {
             const json = await res.json();
             setChartId(json.chart?.id ?? null);
+          } else {
+            const err = await res.json();
+            if (err.error?.includes("UPGRADE_REQUIRED")) {
+              setUpgradeModal({
+                reason: "You've reached your chart limit. Upgrade to save more charts.",
+                limitType: "chart",
+              });
+            }
           }
         }
       } catch (err) {
@@ -97,24 +117,24 @@ export default function AppPage() {
     <div className="max-w-3xl mx-auto px-4 py-8">
       <header className="text-center mb-8">
         <svg width="80" height="80" viewBox="0 0 100 100" className="mx-auto mb-4 animate-rotateSlow">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(201,168,76,0.15)" strokeWidth="0.5" />
-          <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(201,168,76,0.25)" strokeWidth="0.5" />
-          <circle cx="50" cy="50" r="25" fill="none" stroke="rgba(201,168,76,0.35)" strokeWidth="0.5" />
-          <circle cx="50" cy="50" r="8"  fill="rgba(201,168,76,0.2)"  stroke="#C9A84C" strokeWidth="0.5" />
-          <g stroke="#C9A84C" strokeWidth="0.4" opacity="0.5">
-            <line x1="50" y1="5"  x2="50" y2="95" />
-            <line x1="5"  y1="50" x2="95" y2="50" />
+          <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(201,168,76,0.4)" strokeWidth="0.8" />
+          <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(201,168,76,0.5)" strokeWidth="0.8" />
+          <circle cx="50" cy="50" r="25" fill="none" stroke="rgba(201,168,76,0.6)" strokeWidth="0.8" />
+          <circle cx="50" cy="50" r="8" fill="rgba(201,168,76,0.4)" stroke="#C9A84C" strokeWidth="1" />
+          <g stroke="#C9A84C" strokeWidth="0.6" opacity="0.8">
+            <line x1="50" y1="5" x2="50" y2="95" />
+            <line x1="5" y1="50" x2="95" y2="50" />
             <line x1="18" y1="18" x2="82" y2="82" />
             <line x1="82" y1="18" x2="18" y2="82" />
           </g>
           <polygon points="50,8 62,35 92,35 68,53 77,80 50,63 23,80 32,53 8,35 38,35"
-            fill="rgba(201,168,76,0.06)" stroke="#C9A84C" strokeWidth="0.5" />
-          <g fill="#C9A84C" opacity="0.8">
-            <circle cx="50" cy="8"  r="1.5" />
+            fill="rgba(201,168,76,0.12)" stroke="#C9A84C" strokeWidth="0.8" />
+          <g fill="#C9A84C" opacity="1">
+            <circle cx="50" cy="8" r="1.5" />
             <circle cx="92" cy="35" r="1.5" />
             <circle cx="77" cy="80" r="1.5" />
             <circle cx="23" cy="80" r="1.5" />
-            <circle cx="8"  cy="35" r="1.5" />
+            <circle cx="8" cy="35" r="1.5" />
           </g>
         </svg>
         <h1
@@ -123,28 +143,51 @@ export default function AppPage() {
         >
           Jyotish Darshan
         </h1>
-        <p className="mt-2 italic" style={{ color: "var(--muted)", fontSize: 17 }}>
+        <p className="mt-2" style={{ color: "#C4BEDD", fontSize: 17 }}>
           Vedic Kundli · AI Chart Interpretation
         </p>
         <span className="block mt-3" style={{ color: "var(--gold)", fontSize: 20, letterSpacing: 8 }}>✦ ✧ ✦</span>
       </header>
 
-      {step === "form" ? (
-        <BirthForm onSubmit={handleGenerate} loading={loading} />
+     {step === "form" ? (
+        <>
+          <MyCharts onLoad={(saved) => {
+            // Pre-fill form with saved chart data
+            fetch(`/api/charts`)
+              .then(r => r.json())
+              .then(json => {
+                const full = json.charts?.find((c: any) => c.id === saved.id);
+                if (full?.chart_data) {
+                  setChart(full.chart_data);
+                  setDetails({
+                    name: full.name,
+                    dob: full.dob,
+                    tob: full.tob,
+                    pob: full.pob,
+                    lat: full.latitude ?? 0,
+                    lon: full.longitude ?? 0,
+                    timezone: parseFloat(full.timezone ?? "5.5"),
+                  });
+                  setChartId(full.id);
+                  setStep("result");
+                }
+              });
+          }} />
+          <BirthForm onSubmit={handleGenerate} loading={loading} />
+        </>
       ) : (
         chart && details && (
           <div className="animate-fadeInUp space-y-5">
 
-            {/* Chart identity bar */}
             <div className="mystic-card p-5 flex items-center justify-between">
               <div>
                 <div style={{ fontFamily: "Cinzel Decorative, serif", fontSize: 13, color: "var(--gold)", letterSpacing: 2 }}>
                   {details.name || "Native"}
                 </div>
-                <div className="text-sm mt-1 italic" style={{ color: "var(--dim)" }}>
+                <div className="text-sm mt-1 " style={{ color: "#9E96B8" }}>
                   {details.dob} · {details.tob} · {details.pob}
                 </div>
-                <div className="text-sm mt-0.5" style={{ color: "var(--muted)" }}>
+                <div className="text-sm mt-0.5" style={{ color: "#C4BEDD" }}>
                   Lagna:{" "}
                   <span style={{ color: "var(--gold-light)" }}>
                     {chart.lagna.symbol} {chart.lagna.rashi}
@@ -161,7 +204,7 @@ export default function AppPage() {
                 className="text-xs px-3 py-1.5 rounded-lg"
                 style={{
                   border: "0.5px solid rgba(201,168,76,0.3)",
-                  color: "var(--dim)",
+                  color: "#9E96B8",
                   background: "transparent",
                   cursor: "pointer",
                 }}
@@ -170,7 +213,6 @@ export default function AppPage() {
               </button>
             </div>
 
-            {/* Tab bar */}
             <div
               className="flex gap-1 p-1 rounded-xl overflow-x-auto"
               style={{ background: "var(--surface2)" }}
@@ -196,16 +238,13 @@ export default function AppPage() {
               ))}
             </div>
 
-            {/* Tab panels — lazy mount, preserve state after first visit */}
             <div className="mystic-card p-5">
 
-              {/* Chart — always mounted (default tab) */}
               <div style={{ display: activeTab === "chart" ? "block" : "none" }}>
                 <div className="text-xs font-cinzel text-gold tracking-widest mb-4">⬡ BIRTH CHART — NORTH INDIAN STYLE</div>
                 <KundliChartSVG chart={chart} />
               </div>
 
-              {/* Planets */}
               {mountedTabs.has("planets") && (
                 <div style={{ display: activeTab === "planets" ? "block" : "none" }}>
                   <div className="text-xs font-cinzel text-gold tracking-widest mb-4">☽ PLANETARY POSITIONS</div>
@@ -213,7 +252,6 @@ export default function AppPage() {
                 </div>
               )}
 
-              {/* Yogas */}
               {mountedTabs.has("yogas") && (
                 <div style={{ display: activeTab === "yogas" ? "block" : "none" }}>
                   <div className="text-xs font-cinzel text-gold tracking-widest mb-4">✦ PLANETARY YOGAS</div>
@@ -221,7 +259,6 @@ export default function AppPage() {
                 </div>
               )}
 
-              {/* Dasha */}
               {mountedTabs.has("dasha") && (
                 <div style={{ display: activeTab === "dasha" ? "block" : "none" }}>
                   <div className="text-xs font-cinzel text-gold tracking-widest mb-4">♄ VIMSHOTTARI DASHA</div>
@@ -229,8 +266,6 @@ export default function AppPage() {
                 </div>
               )}
 
-              {/* AI Reading — only mounts when tab is clicked, preventing
-                  the 34-second fetch from blocking ChartChat on load */}
               {mountedTabs.has("interpretation") && (
                 <div style={{ display: activeTab === "interpretation" ? "block" : "none" }}>
                   <div className="text-xs font-cinzel text-gold tracking-widest mb-4">☉ AI INTERPRETATION</div>
@@ -238,11 +273,16 @@ export default function AppPage() {
                 </div>
               )}
 
-              {/* Chat — mounts immediately when tab clicked, no blocking fetch */}
               {mountedTabs.has("chat") && (
                 <div style={{ display: activeTab === "chat" ? "block" : "none" }}>
                   <div className="text-xs font-cinzel text-gold tracking-widest mb-4">💬 CHART CONSULTATION</div>
-                  <ChartChat details={details} chart={chart} chartId={chartId} transitPlanets={transitPlanets} />
+                  <ChartChat
+                    details={details}
+                    chart={chart}
+                    chartId={chartId}
+                    transitPlanets={transitPlanets}
+                    onUpgradeRequired={(reason, limitType) => setUpgradeModal({ reason, limitType })}
+                  />
                 </div>
               )}
 
@@ -251,7 +291,15 @@ export default function AppPage() {
         )
       )}
 
-      <footer className="text-center mt-12 text-xs italic" style={{ color: "var(--dim)" }}>
+      {upgradeModal && (
+        <UpgradeModal
+          reason={upgradeModal.reason}
+          limitType={upgradeModal.limitType}
+          onClose={() => setUpgradeModal(null)}
+        />
+      )}
+
+      <footer className="text-center mt-12 text-xs " style={{ color: "#9E96B8" }}>
         Jyotish Darshan · Vedic Astrology
       </footer>
     </div>

@@ -9,7 +9,7 @@ export default function DashaTimeline({ chart }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="text-xs italic mb-4" style={{ color: "var(--dim)" }}>
+      <div className="text-xs  mb-4" style={{ color: "#9E96B8" }}>
         Vimshottari Dasha — 120-year planetary cycle from Moon's nakshatra lord
       </div>
 
@@ -37,17 +37,17 @@ export default function DashaTimeline({ chart }: Props) {
                     </span>
                   )}
                 </div>
-                <div className="text-sm mt-0.5" style={{ color: "var(--dim)" }}>
-                  {d.startDate.getFullYear()} – {d.endDate.getFullYear()} · {d.years} years
+                <div className="text-sm mt-0.5" style={{ color: "#9E96B8" }}>
+                  {new Date(d.startDate).getFullYear()} - {new Date(d.endDate).getFullYear()} · {d.years} years
                 </div>
                 {isActive && activeAntar && (
-                  <div className="text-sm mt-1 italic" style={{ color: "var(--muted)" }}>
+                  <div className="text-sm mt-1 " style={{ color: "#C4BEDD" }}>
                     Current Antardasha: {PLANET_META[activeAntar.planet].symbol} {activeAntar.planetName}
                     · ends {activeAntar.endDate.toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
                   </div>
                 )}
               </div>
-              <div className="text-right text-xs" style={{ color: "var(--dim)" }}>
+              <div className="text-right text-xs" style={{ color: "#9E96B8" }}>
                 {d.years}y
               </div>
             </div>
@@ -79,7 +79,7 @@ export default function DashaTimeline({ chart }: Props) {
               <span className="flex-1 text-sm" style={{ color: a.isActive ? "var(--gold-light)" : "var(--dim)" }}>
                 {a.planetName}
               </span>
-              <span className="text-xs italic" style={{ color: "var(--dim)" }}>
+              <span className="text-xs " style={{ color: "#9E96B8" }}>
                 {a.startDate.toLocaleDateString("en-IN", { month: "short", year: "2-digit" })} – {a.endDate.toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}
               </span>
               {a.isActive && <span style={{ color: "var(--gold)", fontSize: 10 }}>✦</span>}

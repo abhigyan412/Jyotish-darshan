@@ -95,7 +95,7 @@ function OuterCell({ row, col, house, chart }: {
         fontSize="7.5"
         fill="rgba(201,168,76,0.38)"
         textAnchor="end"
-        fontStyle="italic"
+        fontStyle="normal"
       >
         {RASHIS[rashiIdx].substring(0, 3)}
       </text>

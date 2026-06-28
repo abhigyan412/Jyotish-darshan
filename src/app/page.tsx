@@ -30,12 +30,12 @@ export default function LandingPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
-        :root{--gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:rgba(201,168,76,0.35);--lbg:#07060F;--lbg2:#0D0C1A;--lsurface:#111026;--lsurface2:#181730;--ltext:#E8E4D9;--lmuted:#9E96B8;--ldim:#5A5470;}
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;500;600&family=EB+Garamond:wght@400;500&display=swap');
+        :root{--gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:rgba(201,168,76,0.35);--lbg:#07060F;--lbg2:#0D0C1A;--lsurface:#111026;--lsurface2:#181730;--ltext:#F0EDE4;--lmuted:#C4BEDD;--ldim:#9E96B8;}
         .lp *{margin:0;padding:0;box-sizing:border-box;}
         .lp{background:var(--lbg);color:var(--ltext);font-family:'EB Garamond',Georgia,serif;font-size:18px;line-height:1.7;overflow-x:hidden;min-height:100vh;}
         .lp-rashis{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
-        .lp-bubble{position:absolute;bottom:-120px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:0.5px solid rgba(201,168,76,0.15);animation:rashiFloat linear infinite;color:rgba(201,168,76,1);font-family:serif;user-select:none;}
+        .lp-bubble{position:absolute;bottom:-120px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:0.5px solid rgba(201,168,76,0.15);animation:rashiFloat linear infinite;color:rgba(201,168,76,0.8);font-family:'Segoe UI Symbol','Apple Color Emoji',serif;user-select:none;line-height:1;}
         @keyframes rashiFloat{0%{transform:translateY(0) rotate(0deg);opacity:0;}8%{opacity:1;}88%{opacity:1;}100%{transform:translateY(-110vh) rotate(360deg);opacity:0;}}
         .lp-stars{position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 15%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 80% 25%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 45% 60%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1px 1px at 65% 10%,rgba(255,255,255,0.3) 0%,transparent 100%),radial-gradient(1px 1px at 10% 75%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1px 1px at 90% 70%,rgba(255,255,255,0.3) 0%,transparent 100%),radial-gradient(1px 1px at 35% 90%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 75% 85%,rgba(255,255,255,0.4) 0%,transparent 100%);pointer-events:none;z-index:0;}
         .lp-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;background:rgba(7,6,15,0.85);backdrop-filter:blur(12px);border-bottom:0.5px solid var(--gold-dim);}
@@ -49,7 +49,7 @@ export default function LandingPage() {
         @keyframes lpRotate{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
         .lp-badge{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:4px;color:var(--gold);border:0.5px solid var(--gold-dim);padding:0.4rem 1.2rem;border-radius:20px;margin-bottom:2rem;display:inline-block;}
         .lp-title{font-family:'Cinzel Decorative',serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:700;line-height:1.1;letter-spacing:2px;background:linear-gradient(135deg,#E8C97A 0%,#C9A84C 40%,#F0DFA0 70%,#C9A84C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1.5rem;}
-        .lp-sub{font-size:1.2rem;color:var(--lmuted);font-style:italic;max-width:560px;margin:0 auto 3rem;}
+        .lp-sub{font-size:1.15rem;color:#C4BEDD;font-style:normal;max-width:560px;margin:0 auto 3rem;line-height:1.8;}
         .lp-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
         .lp-scroll{margin-top:4rem;color:var(--ldim);font-size:0.75rem;letter-spacing:3px;font-family:'Cinzel',serif;}
         .lp-section{position:relative;z-index:1;padding:6rem 2rem;max-width:1100px;margin:0 auto;}
@@ -58,40 +58,40 @@ export default function LandingPage() {
         .lp-divider span{color:var(--gold);font-size:1.1rem;}
         .lp-label{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;}
         .lp-h2{font-family:'Cinzel Decorative',serif;font-size:clamp(1.6rem,4vw,2.8rem);line-height:1.2;color:var(--ltext);margin-bottom:1.2rem;}
-        .lp-lead{font-size:1.05rem;color:var(--lmuted);font-style:italic;max-width:580px;margin-bottom:3.5rem;}
+        .lp-lead{font-size:1.05rem;color:#C4BEDD;font-style:normal;max-width:580px;margin-bottom:3.5rem;}
         .lp-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;}
         .lp-card{background:var(--lsurface);border:0.5px solid rgba(201,168,76,0.15);border-radius:12px;padding:2rem;transition:border-color 0.3s;}
         .lp-card:hover{border-color:rgba(201,168,76,0.4);}
         .lp-card-icon{font-size:1.8rem;margin-bottom:1rem;display:block;}
         .lp-card-title{font-family:'Cinzel',serif;font-size:0.82rem;letter-spacing:1px;color:var(--gold);margin-bottom:0.6rem;}
-        .lp-card-desc{font-size:0.92rem;color:var(--lmuted);line-height:1.7;}
+        .lp-card-desc{font-size:0.92rem;color:#C4BEDD;font-style:normal;line-height:1.7;}
         .lp-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;}
         .lp-step-num{font-family:'Cinzel Decorative',serif;font-size:3rem;color:var(--gold-dim);line-height:1;margin-bottom:0.75rem;}
         .lp-step-title{font-family:'Cinzel',serif;font-size:0.82rem;letter-spacing:1px;color:var(--gold);margin-bottom:0.5rem;}
-        .lp-step-desc{font-size:0.92rem;color:var(--lmuted);}
+        .lp-step-desc{font-size:0.92rem;color:#C4BEDD;font-style:normal;}
         .lp-testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.5rem;}
         .lp-testimonial{background:var(--lsurface);border:0.5px solid rgba(201,168,76,0.12);border-radius:12px;padding:2rem;}
-        .lp-testimonial-text{font-style:italic;font-size:1rem;color:var(--ltext);margin-bottom:1.5rem;line-height:1.8;}
+        .lp-testimonial-text{font-style:normal;font-size:0.95rem;color:#E8E4D9;margin-bottom:1.5rem;line-height:1.9;letter-spacing:0.2px;}
         .lp-avatar{width:36px;height:36px;border-radius:50%;background:var(--lsurface2);border:0.5px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:0.7rem;color:var(--gold);flex-shrink:0;}
         .lp-author-name{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:1px;color:var(--gold);}
-        .lp-author-detail{font-size:0.8rem;color:var(--ldim);}
-        .lp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:780px;margin:0 auto;}
+        .lp-author-detail{font-size:0.8rem;color:#B0A8C8;font-style:normal;}
+        .lp-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto;}
         .lp-pricing-card{background:var(--lsurface);border:0.5px solid rgba(201,168,76,0.15);border-radius:12px;padding:2.5rem 2rem;text-align:center;}
         .lp-pricing-card.featured{border-color:rgba(201,168,76,0.5);background:var(--lsurface2);}
         .lp-plan{font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:3px;color:var(--gold);margin-bottom:1.5rem;display:block;}
         .lp-price{font-family:'Cinzel Decorative',serif;font-size:2.4rem;color:var(--ltext);margin-bottom:0.2rem;}
-        .lp-period{font-size:0.82rem;color:var(--ldim);margin-bottom:2rem;}
+        .lp-period{font-size:0.82rem;color:#9E96B8;font-style:normal;margin-bottom:2rem;}
         .lp-pf{list-style:none;text-align:left;margin-bottom:2rem;}
-        .lp-pf li{font-size:0.88rem;color:var(--lmuted);padding:0.35rem 0;border-bottom:0.5px solid rgba(201,168,76,0.08);display:flex;align-items:center;gap:0.5rem;}
+        .lp-pf li{font-size:0.88rem;color:#C4BEDD;font-style:normal;padding:0.35rem 0;border-bottom:0.5px solid rgba(201,168,76,0.08);display:flex;align-items:center;gap:0.5rem;}
         .lp-pf li::before{content:'✦';color:var(--gold);font-size:0.55rem;flex-shrink:0;}
         .lp-faq{max-width:720px;margin:0 auto;}
         .lp-faq-item{border-bottom:0.5px solid rgba(201,168,76,0.12);padding:1.5rem 0;}
         .lp-faq-q{font-family:'Cinzel',serif;font-size:0.84rem;color:var(--ltext);margin-bottom:0.6rem;}
-        .lp-faq-a{font-size:0.92rem;color:var(--lmuted);line-height:1.7;}
+        .lp-faq-a{font-size:0.92rem;color:#C4BEDD;font-style:normal;line-height:1.7;}
         .lp-cta{position:relative;z-index:1;text-align:center;padding:8rem 2rem;}
         .lp-footer{position:relative;z-index:1;border-top:0.5px solid var(--gold-dim);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
         .lp-footer-logo{font-family:'Cinzel Decorative',serif;font-size:0.85rem;color:var(--gold);}
-        .lp-footer-text{font-size:0.8rem;color:var(--ldim);font-style:italic;}
+        .lp-footer-text{font-size:0.8rem;color:#9E96B8;font-style:normal;}
         .lp-mockup{max-width:800px;margin:3rem auto 0;border-radius:16px;overflow:hidden;border:0.5px solid rgba(201,168,76,0.2);background:var(--lsurface);box-shadow:0 40px 80px rgba(0,0,0,0.5);}
         .lp-mockup-bar{background:var(--lsurface2);padding:0.75rem 1.25rem;display:flex;align-items:center;gap:0.5rem;border-bottom:0.5px solid rgba(201,168,76,0.1);}
         .lp-dot{width:10px;height:10px;border-radius:50%;background:rgba(201,168,76,0.3);}
@@ -101,7 +101,7 @@ export default function LandingPage() {
         .lp-mockup-label{font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.75rem;}
         .lp-planet-row{display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0;border-bottom:0.5px solid rgba(201,168,76,0.06);font-size:0.7rem;}
         .lp-planet-badge{font-size:0.55rem;padding:1px 6px;border-radius:10px;background:rgba(201,168,76,0.12);color:var(--gold);}
-        .lp-ai-text{font-size:0.75rem;color:var(--lmuted);line-height:1.6;font-style:italic;}
+        .lp-ai-text{font-size:0.75rem;color:#C4BEDD;line-height:1.6;font-style:normal;}
         .lp-ai-label{font-style:normal;color:var(--gold);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:1px;display:block;margin-bottom:0.5rem;}
         @media(max-width:640px){.lp-nav{padding:1rem 1.5rem;}.lp-mockup-body{grid-template-columns:1fr;}.lp-footer{flex-direction:column;text-align:center;}.lp-pricing{grid-template-columns:1fr;}}
       `}</style>
@@ -109,7 +109,6 @@ export default function LandingPage() {
       <div className="lp">
         <div className="lp-stars" />
 
-        {/* Floating rashi bubbles */}
         <div className="lp-rashis">
           {BUBBLES.map((b, i) => (
             <div key={i} className="lp-bubble" style={{
@@ -168,7 +167,7 @@ export default function LandingPage() {
                 {[["☉ Sun", "Taurus 18.4°", "House 1"], ["☽ Moon", "Scorpio 7.2°", "House 7"], ["♃ Jupiter", "Cancer 14.8°", "Exalted"], ["♀ Venus", "Pisces 22.1°", "House 11"], ["♄ Saturn", "Aquarius 5.6°", "Own Sign"]].map(([name, pos, badge]) => (
                   <div key={name} className="lp-planet-row">
                     <span style={{ color: "var(--ltext)" }}>{name}</span>
-                    <span style={{ color: "var(--lmuted)" }}>{pos}</span>
+                    <span style={{ color: "#C4BEDD" }}>{pos}</span>
                     <span className="lp-planet-badge">{badge}</span>
                   </div>
                 ))}
@@ -244,22 +243,48 @@ export default function LandingPage() {
 
         <section className="lp-section" style={{ textAlign: "center" }}>
           <div className="lp-label" style={{ display: "block" }}>✦ Pricing</div>
-          <h2 className="lp-h2">Pricing</h2>
+          <h2 className="lp-h2">Simple, Transparent Pricing</h2>
           <p className="lp-lead" style={{ margin: "0 auto 3rem" }}>Ancient wisdom should be accessible. Start free, go deeper when ready.</p>
           <div className="lp-pricing">
             <div className="lp-pricing-card">
               <span className="lp-plan">FREE</span>
               <div className="lp-price">₹0</div>
               <p className="lp-period">forever</p>
-              <ul className="lp-pf"><li>Full Kundli generation</li><li>Planetary positions & yogas</li><li>Vimshottari Dasha timeline</li><li>1 AI interpretation section</li></ul>
+              <ul className="lp-pf">
+                <li>Full Kundli generation</li>
+                <li>Planetary positions & yogas</li>
+                <li>Vimshottari Dasha timeline</li>
+                <li>3 charts maximum</li>
+                <li>20 AI messages/month</li>
+              </ul>
               <Link href="/app" className="lp-btn-ghost" style={{ width: "100%", textAlign: "center", display: "block" }}>Start Free</Link>
             </div>
             <div className="lp-pricing-card featured">
-              <span className="lp-plan">✦ DARSHAN PRO</span>
-              <div className="lp-price">₹199</div>
+              <span className="lp-plan">✦ BASIC</span>
+              <div className="lp-price">₹419</div>
               <p className="lp-period">per month</p>
-              <ul className="lp-pf"><li>Everything in Free</li><li>All 6 AI interpretation sections</li><li>Unlimited chart chat</li><li>Personalized remedies</li><li>Save & revisit charts</li><li>PDF report download</li></ul>
-              <Link href="/app" className="lp-btn-primary" style={{ width: "100%", textAlign: "center", display: "block" }}>Start for ₹199/mo</Link>
+              <ul className="lp-pf">
+                <li>Everything in Free</li>
+                <li>10 charts</li>
+                <li>500 AI messages/month</li>
+                <li>Yearly predictions</li>
+                <li>Transit analysis</li>
+              </ul>
+              <Link href="/app?upgrade=basic" className="lp-btn-primary" style={{ width: "100%", textAlign: "center", display: "block" }}>Get Basic — ₹419/mo</Link>
+            </div>
+            <div className="lp-pricing-card">
+              <span className="lp-plan">✦ PRO</span>
+              <div className="lp-price">₹4,199</div>
+              <p className="lp-period">per month</p>
+              <ul className="lp-pf">
+                <li>Everything in Basic</li>
+                <li>Unlimited charts</li>
+                <li>Unlimited AI messages</li>
+                <li>Yearly predictions</li>
+                <li>Transit analysis</li>
+                <li>Priority support</li>
+              </ul>
+              <Link href="/app?upgrade=pro" className="lp-btn-primary" style={{ width: "100%", textAlign: "center", display: "block" }}>Get Pro — ₹4,199/mo</Link>
             </div>
           </div>
         </section>
@@ -282,14 +307,14 @@ export default function LandingPage() {
         <div className="lp-cta">
           <div className="lp-label" style={{ display: "block", marginBottom: "1.5rem" }}>✦ Begin Your Journey</div>
           <h2 className="lp-h2" style={{ maxWidth: 560, margin: "0 auto 1.5rem" }}>The Stars Have Been<br />Waiting For You</h2>
-          <p style={{ color: "var(--lmuted)", fontStyle: "italic", marginBottom: "3rem", fontSize: "1.05rem" }}>Your chart was written at the moment of your birth.<br />It is time to read it.</p>
+          <p style={{ color: "#C4BEDD", fontStyle: "normal", marginBottom: "3rem", fontSize: "1.05rem" }}>Your chart was written at the moment of your birth.<br />It is time to read it.</p>
           <Link href="/app" className="lp-btn-primary" style={{ fontSize: "0.85rem", padding: "1.2rem 3rem" }}>✦ Generate My Free Kundli ✦</Link>
         </div>
 
         <footer className="lp-footer">
           <div className="lp-footer-logo">✦ Jyotish Darshan</div>
           <div className="lp-footer-text">Vedic Kundli · AI Chart Interpretation · Built with reverence for the shastra</div>
-          <div style={{ fontSize: "0.75rem", color: "var(--ldim)", fontFamily: "Cinzel, serif", letterSpacing: 1 }}>© 2026 Jyotish Darshan</div>
+          <div style={{ fontSize: "0.75rem", color: "#9E96B8", fontFamily: "Cinzel, serif", letterSpacing: 1 }}>© 2026 Jyotish Darshan</div>
         </footer>
       </div>
     </>

@@ -34,13 +34,13 @@ export default function PlanetTable({ chart }: Props) {
                 <td className="py-2 px-3" style={{ color: "#E8C96A" }}>
                   {p.position.symbol} {p.position.rashi}
                 </td>
-                <td className="py-2 px-3" style={{ color: "var(--muted)", fontSize: 14 }}>
+                <td className="py-2 px-3" style={{ color: "#C4BEDD", fontSize: 14 }}>
                   {p.position.degrees.toFixed(2)}°
                 </td>
                 <td className="py-2 px-3" style={{ color: "var(--text)" }}>
                   H{p.house}
                 </td>
-                <td className="py-2 px-3" style={{ color: "var(--dim)", fontSize: 13, fontStyle: "italic" }}>
+                <td className="py-2 px-3" style={{ color: "#9E96B8", fontSize: 13, fontStyle: "normal" }}>
                   {p.position.nakshatra} P{p.position.nakshatraPada}
                 </td>
                 <td className="py-2 px-3 text-xs" style={{ color: flags.includes("Exalted") ? "#C9A84C" : flags.includes("Debil.") ? "#E24B4A" : "var(--dim)" }}>

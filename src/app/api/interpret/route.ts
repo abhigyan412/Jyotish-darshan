@@ -2,21 +2,15 @@ import { NextRequest } from "next/server";
 import type { BirthDetails, KundliChart, InterpretationSection } from "@/types";
 import { PLANET_META } from "@/lib/astro";
 import { buildSystemPrompt } from "@/lib/promptEngine";
+import { requireAuth } from "@/lib/auth";
 
 export const runtime = "edge";
 
-// ─── Provider config ──────────────────────────────────────────────────────────
-// Zima uses an OpenAI-compatible API — just swap base URL + key.
-// Key prefix detection:
-//   "sk-ant-..."  → direct Anthropic
-//   anything else → Zima (OpenAI-compatible, routes to Claude models)
-
-const ZIMA_BASE_URL = "https://www.zima.chat/api/v1";   // ← update if different
+const ZIMA_BASE_URL = "https://www.zima.chat/api/v1";
 const ANTHROPIC_BASE_URL = "https://api.anthropic.com";
 
-// Model IDs: Zima may use different names — update if needed
 const MODEL_IDS = {
-  zima: "claude-opus-4.5",  // ← Zima's name for Claude MODEL
+  zima: "claude-opus-4.5",
   anthropic: "claude-sonnet-4-20250514",
 };
 
@@ -127,13 +121,9 @@ Be specific, practical, and concise. About 300 words.`,
   return prompts[section];
 }
 
-// ─── Detect which provider to use ─────────────────────────────────────────────
-
 function detectProvider(apiKey: string): "zima" | "anthropic" {
   return apiKey.startsWith("sk-ant-") ? "anthropic" : "zima";
 }
-
-// ─── OpenAI-compatible streaming (Zima) ───────────────────────────────────────
 
 async function streamViaOpenAICompat(
   apiKey: string,
@@ -164,7 +154,6 @@ async function streamViaOpenAICompat(
     throw new Error(`Provider error ${res.status}: ${err.slice(0, 200)}`);
   }
 
-  // Transform SSE chunks → plain text stream
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
@@ -208,8 +197,6 @@ async function streamViaOpenAICompat(
     headers: { "Content-Type": "text/plain; charset=utf-8" },
   });
 }
-
-// ─── Anthropic native streaming ───────────────────────────────────────────────
 
 async function streamViaAnthropic(
   apiKey: string,
@@ -285,12 +272,17 @@ async function streamViaAnthropic(
   });
 }
 
-// ─── POST handler ─────────────────────────────────────────────────────────────
-
-
-
-
 export async function POST(req: NextRequest) {
+  // ─── Auth check ──────────────────────────────────────────────────────────
+  try {
+    await requireAuth();
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "Please sign in to access AI interpretations.", authRequired: true }),
+      { status: 401, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   try {
     let body: { apiKey?: string; baseUrl?: string; details?: BirthDetails; chart?: KundliChart; section?: InterpretationSection };
     try {
@@ -302,19 +294,17 @@ export async function POST(req: NextRequest) {
     }
 
     const { details, chart, section } = body;
-    const apiKey = process.env.ZIMA_API_KEY || "zima-ae583d0069496f08f9eb75514de2dac04c4c77951bd90c882aa49048f9c0ae90";
+    const apiKey = process.env.ZIMA_API_KEY || "";
     const baseUrl = process.env.ZIMA_BASE_URL || "https://www.zima.chat/api/v1";
 
-
     if (!apiKey || apiKey.length < 10) {
-      return new Response(JSON.stringify({ error: "Invalid or missing API key." }), {
-        status: 400, headers: { "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: "API key not configured." }), {
+        status: 500, headers: { "Content-Type": "application/json" },
       });
     }
 
     const provider = detectProvider(apiKey);
     const prompt = buildPrompt(section!, details!, chart!);
-
     const systemPrompt = buildSystemPrompt(details!, chart!);
 
     if (provider === "anthropic") {

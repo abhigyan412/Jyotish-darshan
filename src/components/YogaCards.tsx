@@ -7,7 +7,7 @@ interface Props { chart: KundliChart; }
 export default function YogaCards({ chart }: Props) {
   if (chart.yogas.length === 0) {
     return (
-      <div className="text-center py-8 italic" style={{ color: "var(--dim)" }}>
+      <div className="text-center py-8 " style={{ color: "#9E96B8" }}>
         No prominent yogas detected in this chart.
       </div>
     );
@@ -37,13 +37,13 @@ export default function YogaCards({ chart }: Props) {
               {y.strength}
             </span>
           </div>
-          <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+          <p className="text-sm leading-relaxed" style={{ color: "#C4BEDD" }}>
             {y.description}
           </p>
           <div className="mt-2 flex gap-1 flex-wrap">
             {y.planets.map(pk => (
               <span key={pk} className="text-xs px-2 py-0.5 rounded"
-                style={{ background: "rgba(201,168,76,0.08)", color: "var(--dim)" }}>
+                style={{ background: "rgba(201,168,76,0.08)", color: "#9E96B8" }}>
                 {PLANET_META[pk].symbol} {PLANET_META[pk].name}
               </span>
             ))}

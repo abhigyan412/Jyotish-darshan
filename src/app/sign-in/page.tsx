@@ -44,7 +44,7 @@ export default function SignInPage() {
         .si-logo{font-family:'Cinzel Decorative',serif;font-size:0.85rem;color:#C9A84C;letter-spacing:2px;text-align:center;margin-bottom:0.5rem;}
         .si-divline{width:40px;height:0.5px;background:rgba(201,168,76,0.3);margin:0 auto 2rem;}
         .si-title{font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:2px;color:#E8E4D9;text-align:center;margin-bottom:0.5rem;}
-        .si-sub{font-family:'EB Garamond',serif;font-size:0.9rem;color:#9E96B8;font-style:italic;text-align:center;margin-bottom:2.5rem;}
+        .si-sub{font-family:'EB Garamond',serif;font-size:0.9rem;color:#9E96B8;font-style:normal;text-align:center;margin-bottom:2.5rem;}
         .si-error{background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.3);color:#FCA5A5;padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:1.5rem;font-family:'EB Garamond',serif;}
         .si-google{width:100%;padding:12px 16px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(201,168,76,0.2);border-radius:8px;color:#E8E4D9;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;margin-bottom:1.5rem;}
         .si-google:hover{background:rgba(201,168,76,0.06);border-color:rgba(201,168,76,0.45);}
@@ -58,13 +58,13 @@ export default function SignInPage() {
         .si-btn{width:100%;padding:13px 16px;background:#C9A84C;border:none;border-radius:8px;color:#07060F;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s,transform 0.2s;}
         .si-btn:hover:not(:disabled){opacity:0.88;transform:translateY(-1px);}
         .si-btn:disabled{opacity:0.5;cursor:not-allowed;}
-        .si-note{margin-top:1.5rem;text-align:center;font-family:'EB Garamond',serif;font-size:0.85rem;color:#5A5470;font-style:italic;}
+        .si-note{margin-top:1.5rem;text-align:center;font-family:'EB Garamond',serif;font-size:0.85rem;color:#5A5470;font-style:normal;}
         .si-back{display:block;text-align:center;margin-top:1.5rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:1.5px;color:#5A5470;text-decoration:none;transition:color 0.2s;}
         .si-back:hover{color:#C9A84C;}
         .si-sent{text-align:center;}
         .si-sent-icon{font-size:2.5rem;margin-bottom:1rem;display:block;}
         .si-sent-title{font-family:'Cinzel',serif;font-size:0.9rem;letter-spacing:2px;color:#C9A84C;margin-bottom:0.75rem;}
-        .si-sent-text{font-family:'EB Garamond',serif;font-size:0.95rem;color:#9E96B8;font-style:italic;line-height:1.7;}
+        .si-sent-text{font-family:'EB Garamond',serif;font-size:0.95rem;color:#9E96B8;font-style:normal;line-height:1.7;}
         .si-sent-email{color:#E8C97A;font-style:normal;}
       `}</style>
 

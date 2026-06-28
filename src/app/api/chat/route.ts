@@ -4,11 +4,11 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const ZIMA_BASE_URL = "https://www.zima.chat/api/v1";
 
-let salienceEngineOk  = false;
-let contradictionsOk  = false;
+let salienceEngineOk = false;
+let contradictionsOk = false;
 let queryClassifierOk = false;
-let contextBuilderOk  = false;
-let memoryOk          = false;
+let contextBuilderOk = false;
+let memoryOk = false;
 
 try {
   require("@/lib/contradictions");
@@ -51,29 +51,29 @@ try {
 }
 
 let computeChartSignature: any = null;
-let buildSalienceContext: any  = null;
-let classifyQuery: any         = null;
-let QUERY_PROTOCOLS: any       = null;
-let resolveModel: any          = null;
-let loadMemory: any            = null;
-let updateMemory: any          = null;
+let buildSalienceContext: any = null;
+let classifyQuery: any = null;
+let QUERY_PROTOCOLS: any = null;
+let resolveModel: any = null;
+let loadMemory: any = null;
+let updateMemory: any = null;
 
 if (salienceEngineOk) {
   const se = require("@/lib/salienceEngine");
   computeChartSignature = se.computeChartSignature;
-  buildSalienceContext  = se.buildSalienceContext;
+  buildSalienceContext = se.buildSalienceContext;
 }
 
 if (queryClassifierOk) {
   const qc = require("@/lib/queryClassifier");
-  classifyQuery   = qc.classifyQuery;
+  classifyQuery = qc.classifyQuery;
   QUERY_PROTOCOLS = qc.QUERY_PROTOCOLS;
-  resolveModel    = qc.resolveModel;
+  resolveModel = qc.resolveModel;
 }
 
 if (memoryOk) {
   const mem = require("@/lib/memory");
-  loadMemory   = mem.loadMemory;
+  loadMemory = mem.loadMemory;
   updateMemory = mem.updateMemory;
 }
 
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       transitPlanets,
     } = await req.json();
 
-    const apiKey  = process.env.ZIMA_API_KEY || "";
+    const apiKey = process.env.ZIMA_API_KEY || "";
     const baseUrl = process.env.ZIMA_BASE_URL || ZIMA_BASE_URL;
 
     if (!apiKey) {
@@ -122,78 +122,75 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Auth + Persistence ───────────────────────────────────────────────
-    let userId: string | null         = null;
+    let userId: string | null = null;
     let conversationId: string | null = existingConvId ?? null;
-    let supabaseClient: any           = null;
+    let supabaseClient: any = null;
 
     try {
-      supabaseClient = await createSupabaseServerClient();
-      const { data: { user } } = await supabaseClient.auth.getUser();
+      const { requireAuth, checkMessageLimit, incrementMessageCount } = await import("@/lib/auth");
 
-      if (user) {
-        userId = user.id;
+      const auth = await requireAuth();
+      userId = auth.userId;
+      supabaseClient = auth.supabase;
 
-        const { data: profile } = await supabaseClient
-          .from("profiles")
-          .select("tier")
-          .eq("id", userId)
-          .single();
+      // Check monthly message limit
+      await checkMessageLimit(supabaseClient, userId, auth.tier);
 
-        const tier  = profile?.tier ?? "free";
-        const limits: Record<string, number> = { free: 20, basic: 100, pro: Infinity };
-        const limit = limits[tier] ?? 20;
-
-        if (chartId) {
-          if (!conversationId) {
-            const firstUserMsg = messages.find((m: { role: string }) => m.role === "user");
-            const { data: conv } = await supabaseClient
-              .from("conversations")
-              .insert({
-                user_id:  userId,
-                chart_id: chartId,
-                title:    firstUserMsg?.content?.slice(0, 60) ?? "New reading",
-              })
-              .select("id")
-              .single();
-            conversationId = conv?.id ?? null;
-          }
-
-          if (conversationId && limit !== Infinity) {
-            const { count } = await supabaseClient
-              .from("messages")
-              .select("id", { count: "exact", head: true })
-              .eq("conversation_id", conversationId)
-              .eq("role", "user");
-
-            if ((count ?? 0) >= limit) {
-              return new Response(
-                JSON.stringify({ error: `Message limit reached (${limit} on ${tier} plan).` }),
-                { status: 403, headers: { "Content-Type": "application/json" } }
-              );
-            }
-          }
-
-          const lastUserMsg = messages[messages.length - 1];
-          if (conversationId && lastUserMsg?.role === "user") {
-            await supabaseClient.from("messages").insert({
-              conversation_id: conversationId,
-              user_id:         userId,
-              role:            "user",
-              content:         lastUserMsg.content,
-            });
-          }
+      if (chartId) {
+        // Create conversation if needed
+        if (!conversationId) {
+          const firstUserMsg = messages.find((m: { role: string }) => m.role === "user");
+          const { data: conv } = await supabaseClient
+            .from("conversations")
+            .insert({
+              user_id: userId,
+              chart_id: chartId,
+              title: firstUserMsg?.content?.slice(0, 60) ?? "New reading",
+            })
+            .select("id")
+            .single();
+          conversationId = conv?.id ?? null;
         }
+
+        // Save user message
+        const lastUserMsg = messages[messages.length - 1];
+        if (conversationId && lastUserMsg?.role === "user") {
+          await supabaseClient.from("messages").insert({
+            conversation_id: conversationId,
+            user_id: userId,
+            role: "user",
+            content: lastUserMsg.content,
+          });
+        }
+
+        // Increment monthly counter
+        await incrementMessageCount(supabaseClient, userId);
       }
-    } catch (e) {
-      console.log("AUTH BLOCK ERROR:", (e as Error).message);
+
+    } catch (e: any) {
+      console.log("[AUTH BLOCK] error:", e?.message, e?.status);
+      if (e?.message?.startsWith("UPGRADE_REQUIRED")) {
+        const [, type, msg] = e.message.split(":");
+        return new Response(
+          JSON.stringify({ error: msg, upgradeRequired: true, limitType: type }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      // Not logged in — block completely
+      if (e?.status === 401) {
+        return new Response(
+          JSON.stringify({ error: "Please sign in to use the AI chat.", authRequired: true }),
+          { status: 401, headers: { "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // ─── Build system prompt ──────────────────────────────────────────────
     const lastUserContent = messages[messages.length - 1]?.content ?? "";
-    const year            = detectYear(lastUserContent);
+    const year = detectYear(lastUserContent);
 
     let systemPrompt: string;
-    let modelToUse  = "claude-sonnet-4.5";
+    let modelToUse = "claude-sonnet-4.5";
     let chartMemory: any = null;
 
     if (salienceEngineOk && queryClassifierOk && chart?.lagna && details) {
@@ -219,7 +216,7 @@ export async function POST(req: NextRequest) {
 
         // Step 3: signature
         const lagnaRashiIndex = chart.lagna.rashiIndex ?? 0;
-        let signature: any    = null;
+        let signature: any = null;
 
         // Load from DB only for non-timing queries
         if (!isTimingQuery && supabaseClient && chartId) {
@@ -232,15 +229,15 @@ export async function POST(req: NextRequest) {
 
             if (saved) {
               signature = {
-                dominantAxis:      saved.dominant_axis      ?? [],
+                dominantAxis: saved.dominant_axis ?? [],
                 planetaryPressure: saved.planetary_pressure ?? [],
-                activeHouses:      saved.active_houses      ?? [],
-                timingConfluence:  saved.timing_confluence  ?? [],
-                contradictions:    saved.contradictions     ?? [],
-                partnerSignature:  saved.partner_signature  ?? {},
-                dashaThemes:       saved.dasha_themes       ?? [],
-                computedAt:        saved.computed_at,
-                engineVersion:     saved.engine_version,
+                activeHouses: saved.active_houses ?? [],
+                timingConfluence: saved.timing_confluence ?? [],
+                contradictions: saved.contradictions ?? [],
+                partnerSignature: saved.partner_signature ?? {},
+                dashaThemes: saved.dasha_themes ?? [],
+                computedAt: saved.computed_at,
+                engineVersion: saved.engine_version,
               };
               console.log("[diag] signature loaded from DB OK");
             }
@@ -264,16 +261,16 @@ export async function POST(req: NextRequest) {
           // Only cache non-timing signatures
           if (!isTimingQuery && supabaseClient && chartId) {
             supabaseClient.from("chart_salience").upsert({
-              chart_id:           chartId,
-              dominant_axis:      signature.dominantAxis,
+              chart_id: chartId,
+              dominant_axis: signature.dominantAxis,
               planetary_pressure: signature.planetaryPressure,
-              active_houses:      signature.activeHouses,
-              timing_confluence:  signature.timingConfluence,
-              contradictions:     signature.contradictions,
-              partner_signature:  signature.partnerSignature,
-              dasha_themes:       (signature as any).dashaThemes ?? [],
-              engine_version:     signature.engineVersion,
-              computed_at:        signature.computedAt,
+              active_houses: signature.activeHouses,
+              timing_confluence: signature.timingConfluence,
+              contradictions: signature.contradictions,
+              partner_signature: signature.partnerSignature,
+              dasha_themes: (signature as any).dashaThemes ?? [],
+              engine_version: signature.engineVersion,
+              computed_at: signature.computedAt,
             }, { onConflict: "chart_id" }).then(({ error }: any) => {
               if (error) console.log("[diag] salience save error:", error.message);
             });
@@ -288,7 +285,7 @@ export async function POST(req: NextRequest) {
         );
         console.log("[diag] salienceContext built, length=", salienceContext?.length);
 
-        const protocol    = QUERY_PROTOCOLS[classification.queryClass];
+        const protocol = QUERY_PROTOCOLS[classification.queryClass];
         const yearlyProto = year ? buildYearlyPredictionProtocol(year) : "";
 
         let memoryContext = "";
@@ -320,9 +317,9 @@ export async function POST(req: NextRequest) {
       } catch (e) {
         console.error("[diag] PIPELINE RUNTIME CRASH:", (e as Error).message, "\n", (e as Error).stack);
 
-        const voicePrompt  = buildVoicePrompt();
+        const voicePrompt = buildVoicePrompt();
         const chartContext = buildChartContext(details, chart);
-        const yearlyProto  = year ? buildYearlyPredictionProtocol(year) : "";
+        const yearlyProto = year ? buildYearlyPredictionProtocol(year) : "";
 
         systemPrompt = [
           voicePrompt,
@@ -337,9 +334,9 @@ export async function POST(req: NextRequest) {
     } else {
       console.log("[diag] Pipeline modules not all loaded, using safe path");
 
-      const voicePrompt  = buildVoicePrompt();
+      const voicePrompt = buildVoicePrompt();
       const chartContext = chart && details ? buildChartContext(details, chart) : "";
-      const yearlyProto  = year ? buildYearlyPredictionProtocol(year) : "";
+      const yearlyProto = year ? buildYearlyPredictionProtocol(year) : "";
 
       systemPrompt = [
         voicePrompt,
@@ -355,8 +352,8 @@ export async function POST(req: NextRequest) {
     const persistArgs: PersistArgs = {
       userId,
       conversationId,
-      chartId:     chartId ?? null,
-      queryClass:  classifyQueryLocal(lastUserContent),
+      chartId: chartId ?? null,
+      queryClass: classifyQueryLocal(lastUserContent),
       userMessage: lastUserContent,
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
       supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -369,12 +366,12 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization:  `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model:      modelToUse,
+        model: modelToUse,
         max_tokens: 1200,
-        stream:     true,
+        stream: true,
         messages: [
           { role: "system", content: systemPrompt },
           ...messages.slice(-10),
@@ -407,14 +404,14 @@ export async function POST(req: NextRequest) {
 // ─── Persist ──────────────────────────────────────────────────────────────────
 
 async function saveAssistantReply(
-  fullText:       string,
-  userId:         string | null,
+  fullText: string,
+  userId: string | null,
   conversationId: string | null,
-  chartId:        string | null,
-  queryClass:     string,
-  userMessage:    string,
-  supabaseUrl:    string,
-  supabaseKey:    string
+  chartId: string | null,
+  queryClass: string,
+  userMessage: string,
+  supabaseUrl: string,
+  supabaseKey: string
 ) {
   if (!userId || !conversationId || !fullText) return;
 
@@ -423,9 +420,9 @@ async function saveAssistantReply(
     const db = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
     await db.from("messages").insert({
       conversation_id: conversationId,
-      user_id:         userId,
-      role:            "assistant",
-      content:         fullText,
+      user_id: userId,
+      role: "assistant",
+      content: fullText,
     });
   } catch (e) {
     console.log("SAVE ERROR:", (e as Error).message);
@@ -439,7 +436,7 @@ async function saveAssistantReply(
         userId,
         userMessage,
         assistantResponse: fullText,
-        queryClass:        queryClass as any,
+        queryClass: queryClass as any,
       });
       console.log("[memory] updated OK");
     } catch (e) {
@@ -449,13 +446,13 @@ async function saveAssistantReply(
 }
 
 type PersistArgs = {
-  userId:         string | null;
+  userId: string | null;
   conversationId: string | null;
-  chartId:        string | null;
-  queryClass:     string;
-  userMessage:    string;
-  supabaseUrl:    string;
-  supabaseKey:    string;
+  chartId: string | null;
+  queryClass: string;
+  userMessage: string;
+  supabaseUrl: string;
+  supabaseKey: string;
 };
 
 // ─── Stream ────────────────────────────────────────────────────────────────────
@@ -469,7 +466,7 @@ function streamOpenAI(res: Response, persist: PersistArgs): Response {
       const reader = res.body?.getReader();
       if (!reader) { controller.close(); return; }
 
-      let buffer   = "";
+      let buffer = "";
       let fullText = "";
 
       try {
@@ -501,7 +498,7 @@ function streamOpenAI(res: Response, persist: PersistArgs): Response {
             if (!data) continue;
             try {
               const parsed = JSON.parse(data);
-              const text   = parsed.choices?.[0]?.delta?.content ?? "";
+              const text = parsed.choices?.[0]?.delta?.content ?? "";
               if (text) {
                 fullText += text;
                 controller.enqueue(encoder.encode(text));

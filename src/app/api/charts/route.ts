@@ -8,7 +8,7 @@ export async function GET() {
     // RLS ensures user only sees their own — no .eq("user_id") needed
     const { data, error } = await supabase
       .from("charts")
-      .select("id, name, dob, tob, pob, is_primary, label, created_at")
+      .select("id, name, dob, tob, pob, latitude, longitude, timezone, chart_data, is_primary, label, created_at")
       .order("created_at", { ascending: false });
     if (error) throw error;
     return NextResponse.json({ charts: data });

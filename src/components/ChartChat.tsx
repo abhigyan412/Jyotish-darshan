@@ -16,6 +16,7 @@ interface Props {
   chart: KundliChart;
   chartId?: string | null;
   transitPlanets?: any[];
+  onUpgradeRequired?: (reason: string, limitType: "message" | "chart" | "feature") => void;
 }
 
 function formatText(text: string): string {
@@ -54,19 +55,19 @@ function FeedbackButtons({
     label: string;
     activeColor: string;
   }[] = [
-    { signal: "accurate", label: "✓ This landed",  activeColor: "rgba(74,180,100,0.2)"  },
-    { signal: "more",     label: "↓ Tell me more", activeColor: "rgba(201,168,76,0.2)"  },
-    { signal: "off",      label: "✗ This missed",  activeColor: "rgba(180,74,74,0.2)"   },
-  ];
+      { signal: "accurate", label: "✓ This landed", activeColor: "rgba(74,180,100,0.2)" },
+      { signal: "more", label: "↓ Tell me more", activeColor: "rgba(201,168,76,0.2)" },
+      { signal: "off", label: "✗ This missed", activeColor: "rgba(180,74,74,0.2)" },
+    ];
 
   return (
     <div style={{
-      display:    "flex",
-      gap:        5,
-      marginTop:  10,
+      display: "flex",
+      gap: 5,
+      marginTop: 10,
       paddingTop: 8,
-      borderTop:  "0.5px solid rgba(201,168,76,0.08)",
-      flexWrap:   "wrap",
+      borderTop: "0.5px solid rgba(201,168,76,0.08)",
+      flexWrap: "wrap",
     }}>
       {buttons.map(({ signal, label, activeColor }) => {
         const isActive = current === signal;
@@ -75,15 +76,15 @@ function FeedbackButtons({
             key={signal}
             onClick={() => onFeedback(messageIndex, signal)}
             style={{
-              fontSize:      10,
-              padding:       "3px 10px",
-              borderRadius:  12,
-              border:        `0.5px solid ${isActive ? "rgba(201,168,76,0.45)" : "rgba(201,168,76,0.12)"}`,
-              background:    isActive ? activeColor : "transparent",
-              color:         isActive ? "var(--gold)" : "var(--dim)",
-              cursor:        "pointer",
-              transition:    "all 0.15s",
-              fontFamily:    "inherit",
+              fontSize: 10,
+              padding: "3px 10px",
+              borderRadius: 12,
+              border: `0.5px solid ${isActive ? "rgba(201,168,76,0.45)" : "rgba(201,168,76,0.12)"}`,
+              background: isActive ? activeColor : "transparent",
+              color: isActive ? "var(--gold)" : "var(--dim)",
+              cursor: "pointer",
+              transition: "all 0.15s",
+              fontFamily: "inherit",
               letterSpacing: 0.3,
             }}
             onMouseEnter={e => {
@@ -107,21 +108,21 @@ function FeedbackButtons({
   );
 }
 
-export default function ChartChat({ details, chart, chartId, transitPlanets }: Props) {
+export default function ChartChat({ details, chart, chartId, transitPlanets, onUpgradeRequired }: Props) {
   const welcomeMsg: Message = {
     role: "assistant",
     content: `Namaste! I am your Jyotish guide. I have studied ${details.name || "your"} birth chart carefully — Lagna in ${chart.lagna.rashi}, Moon in ${chart.planets.find(p => p.key === "mo")?.position.rashi}. Ask me anything about your chart, destiny, career, relationships, or remedies.`,
   };
 
-  const [messages, setMessages]             = useState<Message[]>([welcomeMsg]);
-  const [input, setInput]                   = useState("");
-  const [loading, setLoading]               = useState(false);
-  const [convId, setConvId]                 = useState<string | null>(null);
-  const [historyLoaded, setHistoryLoaded]   = useState(false);
-  const [feedbackState, setFeedbackState]   = useState<FeedbackState>({});
+  const [messages, setMessages] = useState<Message[]>([welcomeMsg]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [convId, setConvId] = useState<string | null>(null);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [feedbackState, setFeedbackState] = useState<FeedbackState>({});
   const [streamingIndex, setStreamingIndex] = useState<number | null>(null);
-  const bottomRef                            = useRef<HTMLDivElement>(null);
-  const sendingRef                           = useRef(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const sendingRef = useRef(false);
 
   // ── Load conversation history ────────────────────────────────────────────
   useEffect(() => {
@@ -161,8 +162,8 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
     userContent: string,
     baseMessages: Message[]
   ) => {
-    const userMsg: Message    = { role: "user", content: userContent };
-    const currentMessages     = [...baseMessages, userMsg];
+    const userMsg: Message = { role: "user", content: userContent };
+    const currentMessages = [...baseMessages, userMsg];
 
     setMessages(currentMessages);
     setLoading(true);
@@ -174,19 +175,34 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
         body: JSON.stringify({
           details,
           chart,
-          messages:       currentMessages,
-          chartId:        chartId ?? undefined,
-          conversationId: convId  ?? undefined,
+          messages: currentMessages,
+          chartId: chartId ?? undefined,
+          conversationId: convId ?? undefined,
           transitPlanets: transitPlanets ?? [],
         }),
       });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        if (errData.upgradeRequired && onUpgradeRequired) {
+          onUpgradeRequired(
+            errData.error ?? "You've reached your plan limit.",
+            errData.limitType ?? "message"
+          );
+          setMessages(prev => prev.slice(0, -1));
+          return;
+        }
+        if (errData.authRequired) {
+          window.location.href = "/sign-in";
+          return;
+        }
+        throw new Error(errData.error ?? "Request failed");
+      }
 
-      if (!res.ok) throw new Error(await res.text());
       if (!res.body) throw new Error("No response body");
 
-      const reader  = res.body.getReader();
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let full      = "";
+      let full = "";
 
       const newAssistantIndex = currentMessages.length;
       setMessages(prev => [...prev, { role: "assistant", content: "" }]);
@@ -316,23 +332,23 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div style={{
-                maxWidth:     m.role === "user" ? "72%" : "94%",
-                padding:      m.role === "user" ? "9px 14px" : "14px 16px",
+                maxWidth: m.role === "user" ? "72%" : "94%",
+                padding: m.role === "user" ? "9px 14px" : "14px 16px",
                 borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "4px 16px 16px 16px",
-                background:   m.role === "user" ? "rgba(201,168,76,0.13)" : "var(--surface2)",
-                border:       `0.5px solid ${m.role === "user" ? "rgba(201,168,76,0.35)" : "rgba(201,168,76,0.12)"}`,
-                fontSize:     14.5,
-                lineHeight:   1.75,
-                color:        m.role === "user" ? "var(--gold-light)" : "var(--text)",
+                background: m.role === "user" ? "rgba(201,168,76,0.13)" : "var(--surface2)",
+                border: `0.5px solid ${m.role === "user" ? "rgba(201,168,76,0.35)" : "rgba(201,168,76,0.12)"}`,
+                fontSize: 14.5,
+                lineHeight: 1.75,
+                color: m.role === "user" ? "var(--gold-light)" : "var(--text)",
               }}>
                 {m.role === "assistant" && (
                   <div style={{
-                    fontSize:      9,
-                    color:         "var(--gold)",
-                    fontFamily:    "Cinzel Decorative, serif",
+                    fontSize: 9,
+                    color: "var(--gold)",
+                    fontFamily: "Cinzel Decorative, serif",
                     letterSpacing: 1.5,
-                    marginBottom:  8,
-                    opacity:       0.8,
+                    marginBottom: 8,
+                    opacity: 0.8,
                   }}>
                     ✦ JYOTISH GUIDE
                   </div>
@@ -356,7 +372,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
                       )}
                     </>
                   ) : loading && i === messages.length - 1 ? (
-                    <span style={{ color: "var(--dim)", fontStyle: "italic" }}>
+                    <span style={{ color: "#9E96B8", fontStyle: "normal" }}>
                       reading the stars…
                     </span>
                   ) : null
@@ -383,14 +399,14 @@ export default function ChartChat({ details, chart, chartId, transitPlanets }: P
                 key={q}
                 onClick={() => setInput(q)}
                 style={{
-                  fontSize:     12,
-                  padding:      "5px 12px",
-                  background:   "var(--surface2)",
-                  border:       "0.5px solid rgba(201,168,76,0.22)",
+                  fontSize: 12,
+                  padding: "5px 12px",
+                  background: "var(--surface2)",
+                  border: "0.5px solid rgba(201,168,76,0.22)",
                   borderRadius: 20,
-                  color:        "var(--muted)",
-                  cursor:       "pointer",
-                  transition:   "border-color 0.15s, color 0.15s",
+                  color: "#C4BEDD",
+                  cursor: "pointer",
+                  transition: "border-color 0.15s, color 0.15s",
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.borderColor = "rgba(201,168,76,0.6)";

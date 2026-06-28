@@ -21,9 +21,12 @@ export interface Profile {
   name: string | null;
   avatar_url: string | null;
   tier: SubscriptionTier;
-  stripe_customer_id: string | null;
+  razorpay_customer_id: string | null;
+  razorpay_subscription_id: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
+  messages_used: number;
+  messages_reset_at: string | null;
 }
 
 export interface DbChart {
@@ -63,11 +66,11 @@ export interface DbMessage {
 
 export const TIER_LIMITS: Record<SubscriptionTier, {
   maxCharts: number;
-  maxMessagesPerChart: number;
+  maxMessagesPerMonth: number;
   yearlyPredictions: boolean;
   transitAnalysis: boolean;
 }> = {
-  free:  { maxCharts: 3,        maxMessagesPerChart: 20,       yearlyPredictions: false, transitAnalysis: false },
-  basic: { maxCharts: 10,       maxMessagesPerChart: 100,      yearlyPredictions: true,  transitAnalysis: true  },
-  pro:   { maxCharts: Infinity, maxMessagesPerChart: Infinity, yearlyPredictions: true,  transitAnalysis: true  },
+  free:  { maxCharts: 3,        maxMessagesPerMonth: 20,       yearlyPredictions: false, transitAnalysis: false },
+  basic: { maxCharts: 10,       maxMessagesPerMonth: 500,      yearlyPredictions: true,  transitAnalysis: true  },
+  pro:   { maxCharts: Infinity, maxMessagesPerMonth: Infinity, yearlyPredictions: true,  transitAnalysis: true  },
 };

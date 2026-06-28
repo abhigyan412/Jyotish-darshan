@@ -6,13 +6,13 @@
 :root {
   --gold: #C9A84C;
   --gold-light: #E8C96A;
-  --void: #080614;
-  --surface: #0F0D22;
-  --surface2: #181530;
+  --void: #07060F;
+  --surface: #0D0C1A;
+  --surface2: #111026;
   --border: rgba(201, 168, 76, 0.25);
   --text: #F0E8D5;
-  --muted: #9E96B8;
-  --dim: #7B7499;
+  --muted: #C4BEDD;
+  --dim: #9E96B8;
 }
 
 * {
