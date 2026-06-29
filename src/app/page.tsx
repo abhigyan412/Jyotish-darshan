@@ -245,26 +245,39 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <div className="lp-divider"><span>✦</span></div>
+       <div className="lp-divider"><span>✦</span></div>
 
-        <section className="lp-section">
-          <div className="lp-label">✦ What People Say</div>
-          <h2 className="lp-h2">Trusted by Seekers<br />Across India</h2>
-          <div className="lp-testimonials" style={{ marginTop: "3rem" }}>
+        <section className="lp-section" style={{ textAlign: "center" }}>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "1px",
+            background: "rgba(201,168,76,0.12)",
+            border: "0.5px solid rgba(201,168,76,0.2)",
+            borderRadius: 16,
+            overflow: "hidden",
+            maxWidth: 900,
+            margin: "0 auto",
+          }}>
             {[
-              ["RP", "Rajesh Pandey", "Varanasi · Taurus Lagna", "I have consulted many astrologers over 20 years. This AI reading captured nuances about my Shasha Yoga and current Saturn dasha that even my family Jyotishi had not explained so clearly."],
-              ["PS", "Priya Sharma", "Pune · Scorpio Moon", "My Moon is in Jyeshtha Nakshatra and I always felt misunderstood. The personality reading explained my emotional nature so accurately — my husband was shocked reading it."],
-              ["AK", "Arjun Kumar", "Bangalore · Gemini Lagna", "Used it before a major career decision during my Rahu dasha. The dasha analysis gave me the clarity no human astrologer had managed in three consultations."],
-            ].map(([initials, name, detail, quote]) => (
-              <div key={name} className="lp-testimonial">
-                <p className="lp-testimonial-text">"{quote}"</p>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <div className="lp-avatar">{initials}</div>
-                  <div>
-                    <div className="lp-author-name">{name}</div>
-                    <div className="lp-author-detail">{detail}</div>
-                  </div>
-                </div>
+              ["☉", "Lahiri Ayanamsa", "Government of India standard sidereal calculations"],
+              ["☽", "9 Grahas · 12 Bhavas", "Complete Vedic planetary positions with degrees"],
+              ["✦", "AI-Powered Readings", "Claude AI trained on classical Jyotish shastra"],
+              ["♄", "Vimshottari Dasha", "Full Mahadasha & Antardasha timeline"],
+              ["♃", "Yoga Detection", "Raj, Dhana, and Mahapurusha yogas identified"],
+              ["☿", "Real-time Transits", "Today's planetary positions overlaid on your chart"],
+            ].map(([icon, title, desc]) => (
+              <div key={title} style={{
+                background: "var(--lsurface)",
+                padding: "2rem 1.5rem",
+                textAlign: "center",
+              }}>
+                <div style={{ fontSize: "1.8rem", marginBottom: "0.75rem" }}>{icon}</div>
+                <div style={{
+                  fontFamily: "Cinzel, serif", fontSize: "0.78rem",
+                  letterSpacing: "1px", color: "var(--gold)", marginBottom: "0.5rem",
+                }}>{title}</div>
+                <div style={{ fontSize: "0.82rem", color: "#9E96B8", lineHeight: 1.6 }}>{desc}</div>
               </div>
             ))}
           </div>
@@ -424,8 +437,8 @@ export default function LandingPage() {
           <div className="lp-footer-logo">✦ Jyotish Darshan</div>
           <div className="lp-footer-text">Vedic Kundli · AI Chart Interpretation · Built with reverence for the shastra</div>
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-            <Link href="/privacy" style={{ fontSize: "0.75rem", color: "#5A5470", textDecoration: "none", fontFamily: "Cinzel, serif", letterSpacing: 1 }}>Privacy</Link>
-            <Link href="/terms" style={{ fontSize: "0.75rem", color: "#5A5470", textDecoration: "none", fontFamily: "Cinzel, serif", letterSpacing: 1 }}>Terms</Link>
+            <Link href="/privacy" style={{ fontSize: "0.82rem", color: "#C4BEDD", textDecoration: "none", fontFamily: "Cinzel, serif", letterSpacing: 1 }}>Privacy</Link>
+            <Link href="/terms" style={{ fontSize: "0.82rem", color: "#C4BEDD", textDecoration: "none", fontFamily: "Cinzel, serif", letterSpacing: 1 }}>Terms</Link>
             <div style={{ fontSize: "0.75rem", color: "#9E96B8", fontFamily: "Cinzel, serif", letterSpacing: 1 }}>&#169; 2026 Jyotish Darshan</div>
           </div>
         </footer>
