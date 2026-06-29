@@ -16,6 +16,7 @@ interface Props {
   chart: KundliChart;
   chartId?: string | null;
   transitPlanets?: any[];
+  preloadedHistory?: any[];
   onUpgradeRequired?: (reason: string, limitType: "message" | "chart" | "feature") => void;
 }
 
@@ -128,7 +129,7 @@ const SUGGESTED_QUESTIONS = [
   "What are my biggest strengths?",
 ];
 
-export default function ChartChat({ details, chart, chartId, transitPlanets, onUpgradeRequired }: Props) {
+export default function ChartChat({ details, chart, chartId, transitPlanets, preloadedHistory, onUpgradeRequired }: Props) {
   const welcomeMsg: Message = {
     role: "assistant",
     content: `Namaste! I am your Jyotish guide. I have studied ${details.name || "your"} birth chart carefully — Lagna in ${chart.lagna.rashi}, Moon in ${chart.planets.find(p => p.key === "mo")?.position.rashi}. Ask me anything about your chart, destiny, career, relationships, or remedies.`,
@@ -143,11 +144,10 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
   const [streamingIndex, setStreamingIndex] = useState<number | null>(null);
   const [showScrollBtn, setShowScrollBtn]   = useState(false);
 
-  const bottomRef    = useRef<HTMLDivElement>(null);
-  const scrollRef    = useRef<HTMLDivElement>(null);
-  const textareaRef  = useRef<HTMLTextAreaElement>(null);
-  const sendingRef   = useRef(false);
-  const abortRef     = useRef<AbortController | null>(null);
+  const bottomRef     = useRef<HTMLDivElement>(null);
+  const textareaRef   = useRef<HTMLTextAreaElement>(null);
+  const sendingRef    = useRef(false);
+  const abortRef      = useRef<AbortController | null>(null);
   const isAtBottomRef = useRef(true);
 
   // ── Auto-resize textarea ─────────────────────────────────────────────────
@@ -164,9 +164,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
   // ── Escape key to stop streaming ─────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && loading) {
-        abortRef.current?.abort();
-      }
+      if (e.key === "Escape" && loading) abortRef.current?.abort();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -204,6 +202,27 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
   useEffect(() => {
     if (!chartId || historyLoaded) return;
     setHistoryLoaded(true);
+
+    // Use preloaded history if available — instant, no API call!
+    if (preloadedHistory && preloadedHistory.length > 0) {
+      const seen = new Set<string>();
+      const unique = preloadedHistory.filter((m: { role: string; content: string }) => {
+        const key = `${m.role}:${m.content.slice(0, 50)}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      setMessages([
+        welcomeMsg,
+        ...unique.map((m: { role: string; content: string }) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        })),
+      ]);
+      return;
+    }
+
+    // Fallback — load from API
     async function loadHistory() {
       try {
         const res = await fetch(`/api/conversations?chartId=${chartId}`);
@@ -226,14 +245,15 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
           setMessages([
             welcomeMsg,
             ...unique.map((m: { role: string; content: string }) => ({
-              role: m.role, content: m.content,
+              role: m.role as "user" | "assistant",
+              content: m.content,
             })),
           ]);
         }
       } catch { /* silent */ }
     }
     loadHistory();
-  }, [chartId]);
+  }, [chartId, preloadedHistory]);
 
   // ── Stop streaming ───────────────────────────────────────────────────────
   const stopStreaming = useCallback(() => {
@@ -314,7 +334,6 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
 
     } catch (err: any) {
       if (err?.name === "AbortError") {
-        // Stopped by user — keep whatever was streamed
         setStreamingIndex(null);
         return;
       }
@@ -404,7 +423,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
       <div style={{ display: "flex", flexDirection: "column", height: 580, position: "relative" }}>
 
         {/* ── Messages ── */}
-        <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", paddingRight: 4, marginBottom: 12 }}>
+        <div style={{ flex: 1, overflowY: "auto", paddingRight: 4, marginBottom: 12 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {messages.map((m, i) => (
               <div
@@ -424,8 +443,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
                     ? "linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.08))"
                     : "var(--surface2)",
                   border: `0.5px solid ${m.role === "user" ? "rgba(201,168,76,0.4)" : "rgba(201,168,76,0.1)"}`,
-                  fontSize: 15,
-                  lineHeight: 1.75,
+                  fontSize: 15, lineHeight: 1.75,
                   color: m.role === "user" ? "var(--gold-light)" : "var(--text)",
                   boxShadow: m.role === "user"
                     ? "0 2px 12px rgba(201,168,76,0.08)"
@@ -466,7 +484,6 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
                               onFeedback={handleFeedback} isStreaming={streamingIndex === i}
                             />
                             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                              {/* Regenerate button on last assistant message */}
                               {isLastAssistant(i) && (
                                 <button
                                   className="regen-btn"
@@ -573,7 +590,6 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
             onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
             }}
-            disabled={false}
             style={{
               flex: 1, background: "transparent", border: "none", outline: "none",
               color: "var(--text)", fontFamily: "inherit", fontSize: 15,
@@ -582,7 +598,6 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
             }}
           />
 
-          {/* Stop button during streaming */}
           {loading ? (
             <button
               className="stop-btn"
