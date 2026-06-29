@@ -211,6 +211,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
   // ── Load conversation history ────────────────────────────────────────────
   useEffect(() => {
     if (!chartId || historyLoaded) return;
+    setHistoryLoaded(true); // set immediately to prevent double load
     async function loadHistory() {
       try {
         const res = await fetch(`/api/conversations?chartId=${chartId}`);
@@ -223,15 +224,22 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
         if (!msgRes.ok) return;
         const { messages: history } = await msgRes.json();
         if (history?.length) {
+          // Deduplicate by content to prevent double rendering
+          const seen = new Set<string>();
+          const unique = history.filter((m: { role: string; content: string }) => {
+            const key = `${m.role}:${m.content.slice(0, 50)}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
           setMessages([
             welcomeMsg,
-            ...history.map((m: { role: string; content: string }) => ({
+            ...unique.map((m: { role: string; content: string }) => ({
               role: m.role, content: m.content,
             })),
           ]);
         }
       } catch { /* silent */ }
-      finally { setHistoryLoaded(true); }
     }
     loadHistory();
   }, [chartId]);
