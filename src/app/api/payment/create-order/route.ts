@@ -3,8 +3,8 @@ import Razorpay from "razorpay";
 import { requireAuth } from "@/lib/auth";
 
 const PLAN_AMOUNTS: Record<string, number> = {
-  basic: 41900,   // ₹419 in paise
-  pro:   419900,  // ₹4199 in paise
+  basic: 19900,   // ₹199 in paise
+  pro:   99900,   // ₹999 in paise
 };
 
 export async function POST(req: Request) {

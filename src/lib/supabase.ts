@@ -70,7 +70,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, {
   yearlyPredictions: boolean;
   transitAnalysis: boolean;
 }> = {
-  free:  { maxCharts: 3,        maxMessagesPerMonth: 20,       yearlyPredictions: false, transitAnalysis: false },
-  basic: { maxCharts: 10,       maxMessagesPerMonth: 500,      yearlyPredictions: true,  transitAnalysis: true  },
-  pro:   { maxCharts: Infinity, maxMessagesPerMonth: Infinity, yearlyPredictions: true,  transitAnalysis: true  },
+  free: { maxCharts: 3, maxMessagesPerMonth: 20, yearlyPredictions: false, transitAnalysis: false },
+  basic: { maxCharts: 10, maxMessagesPerMonth: 500, yearlyPredictions: true, transitAnalysis: true },
+  pro: { maxCharts: Infinity, maxMessagesPerMonth: Infinity, yearlyPredictions: true, transitAnalysis: true },
 };

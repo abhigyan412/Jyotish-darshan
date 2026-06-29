@@ -12,6 +12,7 @@ import YogaCards from "@/components/YogaCards";
 import ChartChat from "@/components/ChartChat";
 import UpgradeModal from "@/components/UpgradeModal";
 import MyCharts from "@/components/MyCharts";
+import AuthButton from "@/components/AuthButton";
 
 type Tab = "chart" | "planets" | "yogas" | "dasha" | "interpretation" | "chat";
 
@@ -115,6 +116,24 @@ export default function AppPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+
+      {/* Nav bar */}
+      <div style={{
+        display: "flex", justifyContent: "flex-end", alignItems: "center",
+        marginBottom: "1.5rem", gap: "0.75rem",
+      }}>
+        <a href="/" style={{
+          fontFamily: "Cinzel, serif", fontSize: "0.65rem", letterSpacing: "1.5px",
+          color: "#5A5470", textDecoration: "none", transition: "color 0.2s",
+        }}
+          onMouseEnter={e => (e.currentTarget.style.color = "var(--gold)")}
+          onMouseLeave={e => (e.currentTarget.style.color = "#5A5470")}
+        >
+          ← Home
+        </a>
+        <AuthButton />
+      </div>
+
       <header className="text-center mb-8">
         <svg width="80" height="80" viewBox="0 0 100 100" className="mx-auto mb-4 animate-rotateSlow">
           <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(201,168,76,0.4)" strokeWidth="0.8" />
