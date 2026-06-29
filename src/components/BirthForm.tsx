@@ -113,25 +113,25 @@ export default function BirthForm({ onSubmit, loading }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             <div className="sm:col-span-2">
-              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem" }} style={{ color: "#9E96B8" }}>FULL NAME</label>
+              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem", color: "#C4BEDD" }}>FULL NAME</label>
               <input className="mystic-input" type="text" placeholder="Arjun Sharma"
                 value={form.name} onChange={e => set("name", e.target.value)} />
             </div>
 
             <div>
-              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem" }} style={{ color: "#9E96B8" }}>DATE OF BIRTH</label>
+              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem", color: "#C4BEDD" }}>DATE OF BIRTH</label>
               <input className="mystic-input" type="date" value={form.dob}
                 onChange={e => set("dob", e.target.value)} required />
             </div>
 
             <div>
-              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem" }} style={{ color: "#9E96B8" }}>TIME OF BIRTH</label>
+              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem", color: "#C4BEDD" }}>TIME OF BIRTH</label>
               <input className="mystic-input" type="time" value={form.tob}
                 onChange={e => set("tob", e.target.value)} required />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem" }} style={{ color: "#9E96B8" }}>
+              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem", color: "#C4BEDD" }}>
                 CITY OF BIRTH
               </label>
               <input
