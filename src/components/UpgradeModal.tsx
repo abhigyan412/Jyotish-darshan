@@ -102,7 +102,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           border: 0.5px solid rgba(201,168,76,0.2);
           color: #9E96B8; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
-          font-size: 0.75rem; transition: all 0.2s;
+          font-size:0.98rem; transition: all 0.2s;
         }
         .um-close:hover { color: #C9A84C; border-color: rgba(201,168,76,0.5); }
         .um-header { text-align: center; margin-bottom: 2rem; }
@@ -132,7 +132,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           content: ''; flex: 1; height: 0.5px;
           background: rgba(201,168,76,0.15);
         }
-        .um-divider span { color: #C9A84C; font-size: 0.7rem; }
+        .um-divider span { color: #C9A84C; font-size:0.95rem; }
         .um-plans {
           display: grid; grid-template-columns: 1fr 1fr;
           gap: 1rem; margin-bottom: 1.25rem;
@@ -151,7 +151,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           box-shadow: 0 0 30px rgba(201,168,76,0.06);
         }
         .um-plan-tag {
-          font-family: 'Cinzel', serif; font-size: 0.55rem;
+          font-family: 'Cinzel', serif; font-size:0.95rem;
           letter-spacing: 3px; color: #C9A84C;
           margin-bottom: 1rem;
         }
@@ -191,7 +191,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           border: none; border-radius: 8px;
           color: #07060F;
           font-family: 'Cinzel', serif;
-          font-size: 0.65rem; letter-spacing: 1.5px;
+          font-size:0.90rem; letter-spacing: 1.5px;
           cursor: pointer; transition: opacity 0.2s, transform 0.15s;
           margin-top: auto;
         }
@@ -203,7 +203,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           border: 0.5px solid rgba(201,168,76,0.2);
           border-radius: 10px; color: #5A5470;
           font-family: 'Cinzel', serif;
-          font-size: 0.65rem; letter-spacing: 1.5px;
+          font-size:0.90rem; letter-spacing: 1.5px;
           cursor: pointer; transition: all 0.2s;
         }
         .um-btn-ghost:hover { color: #C9A84C; border-color: rgba(201,168,76,0.4); }
@@ -211,7 +211,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           background: rgba(239,68,68,0.08);
           border: 0.5px solid rgba(239,68,68,0.25);
           color: #FCA5A5; padding: 0.75rem 1rem;
-          border-radius: 8px; font-size: 0.82rem;
+          border-radius: 8px; font-size:1rem;
           text-align: center; margin-bottom: 1rem;
           font-family: 'EB Garamond', serif;
         }

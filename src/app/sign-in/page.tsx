@@ -41,12 +41,12 @@ export default function SignInPage() {
         .si-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:#07060F;position:relative;overflow:hidden;}
         .si-stars{position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 15%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 80% 25%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 45% 60%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1px 1px at 65% 10%,rgba(255,255,255,0.3) 0%,transparent 100%),radial-gradient(1px 1px at 10% 75%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1px 1px at 90% 70%,rgba(255,255,255,0.3) 0%,transparent 100%);pointer-events:none;z-index:0;}
         .si-card{position:relative;z-index:1;width:100%;max-width:420px;background:#111026;border:0.5px solid rgba(201,168,76,0.25);border-radius:16px;padding:3rem 2.5rem;box-shadow:0 40px 80px rgba(0,0,0,0.6);}
-        .si-logo{font-family:'Cinzel Decorative',serif;font-size:0.85rem;color:#C9A84C;letter-spacing:2px;text-align:center;margin-bottom:0.5rem;}
+        .si-logo{font-family:'Cinzel Decorative',serif;font-size:0.95rem;color:#C9A84C;letter-spacing:2px;text-align:center;margin-bottom:0.5rem;}
         .si-divline{width:40px;height:0.5px;background:rgba(201,168,76,0.3);margin:0 auto 2rem;}
         .si-title{font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:2px;color:#E8E4D9;text-align:center;margin-bottom:0.5rem;}
         .si-sub{font-family:'EB Garamond',serif;font-size:0.9rem;color:#9E96B8;font-style:normal;text-align:center;margin-bottom:2.5rem;}
-        .si-error{background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.3);color:#FCA5A5;padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:1.5rem;font-family:'EB Garamond',serif;}
-        .si-google{width:100%;padding:12px 16px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(201,168,76,0.2);border-radius:8px;color:#E8E4D9;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;margin-bottom:1.5rem;}
+        .si-error{background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.3);color:#FCA5A5;padding:10px 14px;border-radius:8px;font-size:1rem;margin-bottom:1.5rem;font-family:'EB Garamond',serif;}
+        .si-google{width:100%;padding:12px 16px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(201,168,76,0.2);border-radius:8px;color:#E8E4D9;font-family:'Cinzel',serif;font-size:0.95rem;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;margin-bottom:1.5rem;}
         .si-google:hover{background:rgba(201,168,76,0.06);border-color:rgba(201,168,76,0.45);}
         .si-google:disabled{opacity:0.5;cursor:not-allowed;}
         .si-sep{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;}
@@ -55,11 +55,11 @@ export default function SignInPage() {
         .si-input{width:100%;padding:12px 16px;background:rgba(255,255,255,0.03);border:0.5px solid rgba(201,168,76,0.2);border-radius:8px;color:#E8E4D9;font-family:'EB Garamond',serif;font-size:1rem;outline:none;transition:border-color 0.2s;margin-bottom:12px;}
         .si-input:focus{border-color:rgba(201,168,76,0.55);}
         .si-input::placeholder{color:#5A5470;}
-        .si-btn{width:100%;padding:13px 16px;background:#C9A84C;border:none;border-radius:8px;color:#07060F;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s,transform 0.2s;}
+        .si-btn{width:100%;padding:13px 16px;background:#C9A84C;border:none;border-radius:8px;color:#07060F;font-family:'Cinzel',serif;font-size:0.95rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s,transform 0.2s;}
         .si-btn:hover:not(:disabled){opacity:0.88;transform:translateY(-1px);}
         .si-btn:disabled{opacity:0.5;cursor:not-allowed;}
-        .si-note{margin-top:1.5rem;text-align:center;font-family:'EB Garamond',serif;font-size:0.85rem;color:#5A5470;font-style:normal;}
-        .si-back{display:block;text-align:center;margin-top:1.5rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:1.5px;color:#5A5470;text-decoration:none;transition:color 0.2s;}
+        .si-note{margin-top:1.5rem;text-align:center;font-family:'EB Garamond',serif;font-size:0.95rem;color:#5A5470;font-style:normal;}
+        .si-back{display:block;text-align:center;margin-top:1.5rem;font-family:'Cinzel',serif;font-size:0.90rem;letter-spacing:1.5px;color:#5A5470;text-decoration:none;transition:color 0.2s;}
         .si-back:hover{color:#C9A84C;}
         .si-sent{text-align:center;}
         .si-sent-icon{font-size:2.5rem;margin-bottom:1rem;display:block;}

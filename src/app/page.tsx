@@ -40,78 +40,78 @@ export default function LandingPage() {
         .lp-stars{position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 15%,rgba(255,255,255,0.6) 0%,transparent 100%),radial-gradient(1px 1px at 80% 25%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 45% 60%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1px 1px at 65% 10%,rgba(255,255,255,0.3) 0%,transparent 100%),radial-gradient(1px 1px at 10% 75%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1px 1px at 90% 70%,rgba(255,255,255,0.3) 0%,transparent 100%),radial-gradient(1px 1px at 35% 90%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 75% 85%,rgba(255,255,255,0.4) 0%,transparent 100%);pointer-events:none;z-index:0;}
         .lp-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;background:rgba(7,6,15,0.85);backdrop-filter:blur(12px);border-bottom:0.5px solid var(--gold-dim);}
         .lp-nav-logo{font-family:'Cinzel Decorative',serif;font-size:1rem;color:var(--gold);letter-spacing:2px;text-decoration:none;}
-        .lp-btn-primary{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:#07060F;background:var(--gold);border:none;padding:0.7rem 1.6rem;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity 0.2s,transform 0.2s;}
+        .lp-btn-primary{font-family:'Cinzel',serif;font-size:0.98rem;letter-spacing:2px;text-transform:uppercase;color:#07060F;background:var(--gold);border:none;padding:0.7rem 1.6rem;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity 0.2s,transform 0.2s;}
         .lp-btn-primary:hover{opacity:0.88;transform:translateY(-1px);}
-        .lp-btn-ghost{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:transparent;border:0.5px solid var(--gold-dim);padding:0.9rem 2.2rem;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.2s;}
+        .lp-btn-ghost{font-family:'Cinzel',serif;font-size:0.98rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:transparent;border:0.5px solid var(--gold-dim);padding:0.9rem 2.2rem;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.2s;}
         .lp-btn-ghost:hover{border-color:var(--gold);background:rgba(201,168,76,0.08);}
         .lp-hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 5rem;}
         .lp-mandala{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:580px;height:580px;opacity:0.04;animation:lpRotate 120s linear infinite;pointer-events:none;}
         @keyframes lpRotate{from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);}}
-        .lp-badge{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:4px;color:var(--gold);border:0.5px solid var(--gold-dim);padding:0.4rem 1.2rem;border-radius:20px;margin-bottom:2rem;display:inline-block;}
+        .lp-badge{font-family:'Cinzel',serif;font-size:0.90rem;letter-spacing:4px;color:var(--gold);border:0.5px solid var(--gold-dim);padding:0.4rem 1.2rem;border-radius:20px;margin-bottom:2rem;display:inline-block;}
         .lp-title{font-family:'Cinzel Decorative',serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:700;line-height:1.1;letter-spacing:2px;background:linear-gradient(135deg,#E8C97A 0%,#C9A84C 40%,#F0DFA0 70%,#C9A84C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1.5rem;}
         .lp-sub{font-size:1.15rem;color:#C4BEDD;font-style:normal;max-width:560px;margin:0 auto 3rem;line-height:1.8;}
         .lp-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
-        .lp-scroll{margin-top:4rem;color:var(--ldim);font-size:0.75rem;letter-spacing:3px;font-family:'Cinzel',serif;}
+        .lp-scroll{margin-top:4rem;color:var(--ldim);font-size:0.98rem;letter-spacing:3px;font-family:'Cinzel',serif;}
         .lp-section{position:relative;z-index:1;padding:6rem 2rem;max-width:1100px;margin:0 auto;}
         .lp-divider{position:relative;z-index:1;display:flex;align-items:center;gap:1rem;padding:0 3rem;margin:1rem 0;}
         .lp-divider::before,.lp-divider::after{content:'';flex:1;height:0.5px;background:var(--gold-dim);}
         .lp-divider span{color:var(--gold);font-size:1.1rem;}
-        .lp-label{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;}
+        .lp-label{font-family:'Cinzel',serif;font-size:0.90rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;}
         .lp-h2{font-family:'Cinzel Decorative',serif;font-size:clamp(1.6rem,4vw,2.8rem);line-height:1.2;color:var(--ltext);margin-bottom:1.2rem;}
         .lp-lead{font-size:1.05rem;color:#C4BEDD;font-style:normal;max-width:580px;margin-bottom:3.5rem;}
         .lp-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;}
         .lp-card{background:var(--lsurface);border:0.5px solid rgba(201,168,76,0.15);border-radius:12px;padding:2rem;transition:border-color 0.3s;}
         .lp-card:hover{border-color:rgba(201,168,76,0.4);}
         .lp-card-icon{font-size:1.8rem;margin-bottom:1rem;display:block;}
-        .lp-card-title{font-family:'Cinzel',serif;font-size:0.82rem;letter-spacing:1px;color:var(--gold);margin-bottom:0.6rem;}
-        .lp-card-desc{font-size:0.92rem;color:#C4BEDD;font-style:normal;line-height:1.7;}
+        .lp-card-title{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:1px;color:var(--gold);margin-bottom:0.6rem;}
+        .lp-card-desc{font-size:1rem;color:#C4BEDD;font-style:normal;line-height:1.7;}
         .lp-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;}
         .lp-step-num{font-family:'Cinzel Decorative',serif;font-size:3rem;color:var(--gold-dim);line-height:1;margin-bottom:0.75rem;}
-        .lp-step-title{font-family:'Cinzel',serif;font-size:0.82rem;letter-spacing:1px;color:var(--gold);margin-bottom:0.5rem;}
-        .lp-step-desc{font-size:0.92rem;color:#C4BEDD;font-style:normal;}
+        .lp-step-title{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:1px;color:var(--gold);margin-bottom:0.5rem;}
+        .lp-step-desc{font-size:1rem;color:#C4BEDD;font-style:normal;}
         .lp-testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.5rem;}
         .lp-testimonial{background:var(--lsurface);border:0.5px solid rgba(201,168,76,0.12);border-radius:12px;padding:2rem;}
         .lp-testimonial-text{font-style:normal;font-size:0.95rem;color:#E8E4D9;margin-bottom:1.5rem;line-height:1.9;letter-spacing:0.2px;}
-        .lp-avatar{width:36px;height:36px;border-radius:50%;background:var(--lsurface2);border:0.5px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:0.7rem;color:var(--gold);flex-shrink:0;}
-        .lp-author-name{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:1px;color:var(--gold);}
+        .lp-avatar{width:36px;height:36px;border-radius:50%;background:var(--lsurface2);border:0.5px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:0.95rem;color:var(--gold);flex-shrink:0;}
+        .lp-author-name{font-family:'Cinzel',serif;font-size:0.98rem;letter-spacing:1px;color:var(--gold);}
         .lp-author-detail{font-size:0.8rem;color:#B0A8C8;font-style:normal;}
         .lp-pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:0;max-width:900px;margin:0 auto;border:0.5px solid rgba(201,168,76,0.2);border-radius:16px;overflow:hidden;}
         .lp-pricing-card{background:var(--lsurface);padding:2.5rem 2rem;text-align:left;position:relative;border-right:0.5px solid rgba(201,168,76,0.12);}
         .lp-pricing-card:last-child{border-right:none;}
         .lp-pricing-card.featured{background:linear-gradient(160deg,#13112A,#0D0C1A);border-right:0.5px solid rgba(201,168,76,0.2);}
         .lp-pricing-card.featured::before{content:'MOST POPULAR';position:absolute;top:0;left:50%;transform:translateX(-50%);background:var(--gold);color:#07060F;font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:2px;padding:3px 12px;border-radius:0 0 8px 8px;}
-        .lp-plan{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:3px;color:var(--gold);margin-bottom:1.25rem;display:block;opacity:0.8;}
+        .lp-plan{font-family:'Cinzel',serif;font-size:0.90rem;letter-spacing:3px;color:var(--gold);margin-bottom:1.25rem;display:block;opacity:0.8;}
         .lp-price{font-family:'Cinzel Decorative',serif;font-size:2.6rem;color:var(--ltext);line-height:1;margin-bottom:0.25rem;}
-        .lp-period{font-size:0.78rem;color:#9E96B8;font-style:normal;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:0.5px solid rgba(201,168,76,0.1);}
+        .lp-period{font-size:0.90rem;color:#9E96B8;font-style:normal;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:0.5px solid rgba(201,168,76,0.1);}
         .lp-pf{list-style:none;text-align:left;margin-bottom:2rem;}
-        .lp-pf li{font-size:0.85rem;color:#C4BEDD;font-style:normal;padding:0.4rem 0;display:flex;align-items:flex-start;gap:0.6rem;line-height:1.5;}
+        .lp-pf li{font-size:0.95rem;color:#C4BEDD;font-style:normal;padding:0.4rem 0;display:flex;align-items:flex-start;gap:0.6rem;line-height:1.5;}
         .lp-pf li.included::before{content:'✦';color:var(--gold);font-size:0.5rem;flex-shrink:0;margin-top:0.35rem;}
         .lp-pf li.excluded{color:#5A5470;}
         .lp-pf li.excluded::before{content:'–';color:#5A5470;font-size:0.8rem;flex-shrink:0;}
-        .lp-pf-section{font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:2px;color:rgba(201,168,76,0.4);margin:1rem 0 0.5rem;display:block;}
+        .lp-pf-section{font-family:'Cinzel',serif;font-size:0.95rem;letter-spacing:2px;color:rgba(201,168,76,0.4);margin:1rem 0 0.5rem;display:block;}
         .lp-faq{max-width:720px;margin:0 auto;}
         .lp-faq-item{border-bottom:0.5px solid rgba(201,168,76,0.12);padding:1.5rem 0;}
         .lp-faq-q{font-family:'Cinzel',serif;font-size:0.84rem;color:var(--ltext);margin-bottom:0.6rem;}
-        .lp-faq-a{font-size:0.92rem;color:#C4BEDD;font-style:normal;line-height:1.7;}
+        .lp-faq-a{font-size:1rem;color:#C4BEDD;font-style:normal;line-height:1.7;}
         .lp-cta{position:relative;z-index:1;text-align:center;padding:8rem 2rem;}
         .lp-footer{position:relative;z-index:1;border-top:0.5px solid var(--gold-dim);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
-        .lp-footer-logo{font-family:'Cinzel Decorative',serif;font-size:0.85rem;color:var(--gold);}
+        .lp-footer-logo{font-family:'Cinzel Decorative',serif;font-size:0.95rem;color:var(--gold);}
         .lp-footer-text{font-size:0.8rem;color:#9E96B8;font-style:normal;}
         .lp-mockup{max-width:800px;margin:3rem auto 0;border-radius:16px;overflow:hidden;border:0.5px solid rgba(201,168,76,0.2);background:var(--lsurface);box-shadow:0 40px 80px rgba(0,0,0,0.5);}
         .lp-mockup-bar{background:var(--lsurface2);padding:0.75rem 1.25rem;display:flex;align-items:center;gap:0.5rem;border-bottom:0.5px solid rgba(201,168,76,0.1);}
         .lp-dot{width:10px;height:10px;border-radius:50%;background:rgba(201,168,76,0.3);}
-        .lp-url{font-size:0.7rem;color:var(--ldim);font-family:monospace;margin-left:0.5rem;}
+        .lp-url{font-size:0.95rem;color:var(--ldim);font-family:monospace;margin-left:0.5rem;}
         .lp-mockup-body{padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
         .lp-mockup-panel{background:var(--lsurface2);border:0.5px solid rgba(201,168,76,0.1);border-radius:8px;padding:1.25rem;}
-        .lp-mockup-label{font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.75rem;}
-        .lp-planet-row{display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0;border-bottom:0.5px solid rgba(201,168,76,0.06);font-size:0.7rem;}
-        .lp-planet-badge{font-size:0.55rem;padding:1px 6px;border-radius:10px;background:rgba(201,168,76,0.12);color:var(--gold);}
-        .lp-ai-text{font-size:0.75rem;color:#C4BEDD;line-height:1.6;font-style:normal;}
+        .lp-mockup-label{font-family:'Cinzel',serif;font-size:0.95rem;letter-spacing:2px;color:var(--gold);margin-bottom:0.75rem;}
+        .lp-planet-row{display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0;border-bottom:0.5px solid rgba(201,168,76,0.06);font-size:0.95rem;}
+        .lp-planet-badge{font-size:0.95rem;padding:1px 6px;border-radius:10px;background:rgba(201,168,76,0.12);color:var(--gold);}
+        .lp-ai-text{font-size:0.98rem;color:#C4BEDD;line-height:1.6;font-style:normal;}
         .lp-ai-label{font-style:normal;color:var(--gold);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:1px;display:block;margin-bottom:0.5rem;}
         .lp-compare-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:0;max-width:900px;margin:0 auto 0;background:var(--lsurface2);border:0.5px solid rgba(201,168,76,0.2);border-radius:12px 12px 0 0;overflow:hidden;}
         .lp-compare-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:0;max-width:900px;margin:0 auto;border-left:0.5px solid rgba(201,168,76,0.12);border-right:0.5px solid rgba(201,168,76,0.12);border-bottom:0.5px solid rgba(201,168,76,0.08);}
         .lp-compare-row:last-child{border-bottom:0.5px solid rgba(201,168,76,0.12);border-radius:0 0 12px 12px;}
-        .lp-compare-cell{padding:0.75rem 1.25rem;font-size:0.85rem;color:#C4BEDD;border-right:0.5px solid rgba(201,168,76,0.08);display:flex;align-items:center;}
+        .lp-compare-cell{padding:0.75rem 1.25rem;font-size:0.95rem;color:#C4BEDD;border-right:0.5px solid rgba(201,168,76,0.08);display:flex;align-items:center;}
         .lp-compare-cell:last-child{border-right:none;}
         .lp-compare-cell.center{justify-content:center;text-align:center;}
         .lp-compare-cell.featured-col{background:rgba(201,168,76,0.04);}
@@ -400,7 +400,26 @@ export default function LandingPage() {
           <p style={{ color: "#C4BEDD", fontStyle: "normal", marginBottom: "3rem", fontSize: "1.05rem" }}>Your chart was written at the moment of your birth.<br />It is time to read it.</p>
           <Link href="/app" className="lp-btn-primary" style={{ fontSize: "0.85rem", padding: "1.2rem 3rem" }}>✦ Generate My Free Kundli ✦</Link>
         </div>
-
+        {/* Prefetch charts on hover */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          document.addEventListener('DOMContentLoaded', function() {
+            var btns = document.querySelectorAll('a[href="/app"]');
+            var prefetched = false;
+            btns.forEach(function(btn) {
+              btn.addEventListener('mouseenter', function() {
+                if (prefetched) return;
+                prefetched = true;
+                fetch('/api/charts').then(function(r) {
+                  return r.json();
+                }).then(function(data) {
+                  if (data.charts) {
+                    sessionStorage.setItem('prefetched_charts', JSON.stringify(data.charts));
+                  }
+                }).catch(function() {});
+              });
+            });
+          });
+        `}} />
         <footer className="lp-footer">
           <div className="lp-footer-logo">✦ Jyotish Darshan</div>
           <div className="lp-footer-text">Vedic Kundli · AI Chart Interpretation · Built with reverence for the shastra</div>

@@ -113,25 +113,25 @@ export default function BirthForm({ onSubmit, loading }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             <div className="sm:col-span-2">
-              <label className="block text-xs tracking-widest mb-1" style={{ color: "#9E96B8" }}>FULL NAME</label>
+              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem" }} style={{ color: "#9E96B8" }}>FULL NAME</label>
               <input className="mystic-input" type="text" placeholder="Arjun Sharma"
                 value={form.name} onChange={e => set("name", e.target.value)} />
             </div>
 
             <div>
-              <label className="block text-xs tracking-widest mb-1" style={{ color: "#9E96B8" }}>DATE OF BIRTH</label>
+              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem" }} style={{ color: "#9E96B8" }}>DATE OF BIRTH</label>
               <input className="mystic-input" type="date" value={form.dob}
                 onChange={e => set("dob", e.target.value)} required />
             </div>
 
             <div>
-              <label className="block text-xs tracking-widest mb-1" style={{ color: "#9E96B8" }}>TIME OF BIRTH</label>
+              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem" }} style={{ color: "#9E96B8" }}>TIME OF BIRTH</label>
               <input className="mystic-input" type="time" value={form.tob}
                 onChange={e => set("tob", e.target.value)} required />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs tracking-widest mb-1" style={{ color: "#9E96B8" }}>
+              <label className="block tracking-widest mb-1" style={{ fontSize: "0.85rem" }} style={{ color: "#9E96B8" }}>
                 CITY OF BIRTH
               </label>
               <input
@@ -195,7 +195,7 @@ export default function BirthForm({ onSubmit, loading }: Props) {
               <div style={{ fontWeight: 500, marginBottom: 2 }}>
                 {s.display_name.split(",")[0]}
               </div>
-              <div style={{ fontSize: 11, color: "var(--dim, #5A5470)" }}>
+              <div style={{ fontSize: 13, color: "var(--dim, #5A5470)" }}>
                 {s.display_name.split(",").slice(1, 3).join(",").trim()}
                 {" · "}
                 {parseFloat(s.lat).toFixed(2)}°N {parseFloat(s.lon).toFixed(2)}°E

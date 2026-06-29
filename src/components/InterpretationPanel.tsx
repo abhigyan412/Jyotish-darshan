@@ -19,7 +19,7 @@ const SECTIONS: { key: InterpretationSection; label: string; icon: string }[] = 
 function formatText(text: string): string {
   return text
     .replace(/^---$/gm, "<hr style='border:none;border-top:0.5px solid rgba(201,168,76,0.15);margin:0.8rem 0;'/>")
-    .replace(/^#{1,3}\s+(.+)$/gm, "<div style='font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:1.5px;color:var(--gold);margin:1.1rem 0 0.3rem;text-transform:uppercase;'>$1</div>")
+    .replace(/^#{1,3}\s+(.+)$/gm, "<div style='font-family:Cinzel,serif;font-size:0.95rem;letter-spacing:1.5px;color:var(--gold);margin:1.1rem 0 0.3rem;text-transform:uppercase;'>$1</div>")
     .replace(/\*\*(.+?)\*\*/g, "<strong style='color:var(--gold-light);font-weight:600;'>$1</strong>")
     .replace(/^- (.+)$/gm, "<div style='padding-left:1rem;margin:0.2rem 0;'>· $1</div>")
     .replace(/^\d+\.\s+(.+)$/gm, "<div style='padding-left:1rem;margin:0.25rem 0;'>$1</div>")
@@ -166,7 +166,7 @@ export default function InterpretationPanel({ details, chart }: Props) {
             className="px-3 py-1.5 rounded-lg text-sm transition-all"
             style={{
               fontFamily: "Cinzel Decorative, serif",
-              fontSize: 10,
+              fontSize: 14,
               letterSpacing: 1,
               background: activeSection === s.key ? "rgba(201,168,76,0.15)" : "var(--surface2)",
               border: `0.5px solid ${activeSection === s.key ? "rgba(201,168,76,0.5)" : "rgba(201,168,76,0.15)"}`,
@@ -211,7 +211,7 @@ export default function InterpretationPanel({ details, chart }: Props) {
             color: "var(--text)",
           }}>
             <div style={{
-              fontSize: 9,
+              fontSize: 11,
               color: "var(--gold)",
               fontFamily: "Cinzel Decorative, serif",
               letterSpacing: 1.5,

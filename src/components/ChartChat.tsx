@@ -22,7 +22,7 @@ interface Props {
 function formatText(text: string): string {
   return text
     .replace(/^---$/gm, "<hr style='border:none;border-top:0.5px solid rgba(201,168,76,0.15);margin:0.8rem 0;'/>")
-    .replace(/^#{1,3}\s+(.+)$/gm, "<div style='font-family:Cinzel,serif;font-size:0.72rem;letter-spacing:1.5px;color:var(--gold);margin:1rem 0 0.3rem;text-transform:uppercase;'>$1</div>")
+    .replace(/^#{1,3}\s+(.+)$/gm, "<div style='font-family:Cinzel,serif;font-size:0.95rem;letter-spacing:1.5px;color:var(--gold);margin:1rem 0 0.3rem;text-transform:uppercase;'>$1</div>")
     .replace(/\*\*(.+?)\*\*/g, "<strong style='color:var(--gold-light);font-weight:600;'>$1</strong>")
     .replace(/^- (.+)$/gm, "<div style='padding-left:1rem;margin:0.2rem 0;'>· $1</div>")
     .split(/\n{2,}/)
@@ -65,7 +65,7 @@ function CopyButton({ text }: { text: string }) {
         border: "none",
         cursor: "pointer",
         color: copied ? "var(--gold)" : "#5A5470",
-        fontSize: 11,
+        fontSize: 13,
         padding: "2px 6px",
         borderRadius: 4,
         transition: "color 0.15s",
@@ -123,7 +123,7 @@ function FeedbackButtons({
             key={signal}
             onClick={() => onFeedback(messageIndex, signal)}
             style={{
-              fontSize: 10, padding: "3px 10px", borderRadius: 12,
+              fontSize: 14, padding: "3px 10px", borderRadius: 12,
               border: `0.5px solid ${isActive ? "rgba(201,168,76,0.45)" : "rgba(201,168,76,0.12)"}`,
               background: isActive ? activeColor : "transparent",
               color: isActive ? "var(--gold)" : "#9E96B8",
@@ -508,7 +508,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
                   textareaRef.current?.focus();
                 }}
                 style={{
-                  fontSize: 12, padding: "6px 14px",
+                  fontSize: 14, padding: "6px 14px",
                   background: "var(--surface2)",
                   border: "0.5px solid rgba(201,168,76,0.2)",
                   borderRadius: 20, color: "#C4BEDD",
@@ -570,7 +570,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
           </button>
         </div>
 
-        <p style={{ textAlign: "center", fontSize: 10, color: "#5A5470", marginTop: 6, letterSpacing: 0.5 }}>
+        <p style={{ textAlign: "center", fontSize: 14, color: "#5A5470", marginTop: 6, letterSpacing: 0.5 }}>
           Press Enter to send · Shift+Enter for new line
         </p>
       </div>

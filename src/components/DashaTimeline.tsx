@@ -27,12 +27,12 @@ export default function DashaTimeline({ chart }: Props) {
               <span className="text-2xl">{d.symbol}</span>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span style={{ fontFamily: "Cinzel Decorative, serif", fontSize: 11, color: "var(--gold)", letterSpacing: 1 }}>
+                  <span style={{ fontFamily: "Cinzel Decorative, serif", fontSize: 13, color: "var(--gold)", letterSpacing: 1 }}>
                     {d.planetName} Mahadasha
                   </span>
                   {isActive && (
                     <span className="text-xs px-2 py-0.5 rounded-full"
-                      style={{ background: "rgba(201,168,76,0.2)", color: "var(--gold-light)", fontSize: 11 }}>
+                      style={{ background: "rgba(201,168,76,0.2)", color: "var(--gold-light)", fontSize: 13 }}>
                       Active
                     </span>
                   )}
@@ -85,7 +85,7 @@ export default function DashaTimeline({ chart }: Props) {
                 {" – "}
                 {new Date(a.endDate).toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}
               </span>
-              {a.isActive && <span style={{ color: "var(--gold)", fontSize: 10 }}>{"✦"}</span>}
+              {a.isActive && <span style={{ color: "var(--gold)", fontSize: 14 }}>{"✦"}</span>}
             </div>
           ))}
         </div>

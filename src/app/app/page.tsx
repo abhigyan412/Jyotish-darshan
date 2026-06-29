@@ -123,8 +123,14 @@ export default function AppPage() {
         marginBottom: "1.5rem", gap: "0.75rem",
       }}>
         <a href="/" style={{
-          fontFamily: "Cinzel, serif", fontSize: "0.65rem", letterSpacing: "1.5px",
-          color: "#5A5470", textDecoration: "none", transition: "color 0.2s",
+          fontFamily: "Cinzel, serif", fontSize: "0.85rem", letterSpacing: "2px",
+          color: "#C4BEDD", textDecoration: "none", transition: "color 0.2s",
+          padding: "6px 14px",
+          border: "0.5px solid rgba(201,168,76,0.25)",
+          borderRadius: "20px",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
         }}
           onMouseEnter={e => (e.currentTarget.style.color = "var(--gold)")}
           onMouseLeave={e => (e.currentTarget.style.color = "#5A5470")}
@@ -243,7 +249,7 @@ export default function AppPage() {
                   className="flex-1 py-2 px-2 rounded-lg text-center transition-all whitespace-nowrap"
                   style={{
                     fontFamily: "Cinzel Decorative, serif",
-                    fontSize: 9,
+                    fontSize: 11,
                     letterSpacing: 0.5,
                     background: activeTab === t.key ? "rgba(201,168,76,0.15)" : "transparent",
                     border: `0.5px solid ${activeTab === t.key ? "rgba(201,168,76,0.4)" : "transparent"}`,

@@ -25,14 +25,14 @@ export default function YogaCards({ chart }: Props) {
             <span style={{ color: y.isBenefic ? "var(--gold)" : "#E24B4A", fontSize: 16 }}>
               {y.isBenefic ? "✦" : "⚠"}
             </span>
-            <span style={{ fontFamily: "Cinzel Decorative, serif", fontSize: 11, color: y.isBenefic ? "var(--gold)" : "#E24B4A", letterSpacing: 1 }}>
+            <span style={{ fontFamily: "Cinzel Decorative, serif", fontSize: 13, color: y.isBenefic ? "var(--gold)" : "#E24B4A", letterSpacing: 1 }}>
               {y.name}
             </span>
             <span className="ml-auto text-xs px-2 py-0.5 rounded-full"
               style={{
                 background: y.strength === "strong" ? "rgba(201,168,76,0.15)" : "rgba(158,150,184,0.15)",
                 color: y.strength === "strong" ? "var(--gold)" : "var(--muted)",
-                fontSize: 10,
+                fontSize: 14,
               }}>
               {y.strength}
             </span>

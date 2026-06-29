@@ -5,11 +5,10 @@ import { createSupabaseBrowserClient } from "@/lib/supabase";
 import type { SubscriptionTier } from "@/lib/supabase";
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
-  free:  "#C4BEDD",
+  free:  "#E8E4D9",
   basic: "#C9A84C",
   pro:   "#78C8FF",
 };
-
 const TIER_LABELS: Record<SubscriptionTier, string> = {
   free:  "FREE",
   basic: "BASIC",
@@ -29,16 +28,18 @@ export default function AuthButton() {
       setUser(u);
 
       if (u) {
-        const { data: profile } = await supabase
+        // Parallel fetch — don't wait sequentially
+        supabase
           .from("profiles")
           .select("tier")
           .eq("id", u.id)
-          .single();
-        setTier((profile?.tier ?? "free") as SubscriptionTier);
+          .single()
+          .then(({ data: profile }) => {
+            setTier((profile?.tier ?? "free") as SubscriptionTier);
+          });
       }
       setLoading(false);
     }
-
     loadUserAndTier();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -78,11 +79,12 @@ export default function AuthButton() {
           fontFamily:    "Cinzel, serif",
           fontSize:      "0.55rem",
           letterSpacing: "1.5px",
-          color:         TIER_COLORS[tier],
+          color:         tier === "free" ? "#07060F" : TIER_COLORS[tier],
           border:        `0.5px solid ${TIER_COLORS[tier]}`,
           borderRadius:  "20px",
           padding:       "2px 8px",
-          opacity:       0.9,
+          background:    tier === "free" ? "#E8E4D9" : "transparent",
+          opacity:       1,
         }}>
           {TIER_LABELS[tier]}
         </div>

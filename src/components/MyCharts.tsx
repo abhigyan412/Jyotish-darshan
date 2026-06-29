@@ -66,11 +66,26 @@ export default function MyCharts({ onLoad }: Props) {
 
   useEffect(() => {
     async function load() {
+      // Check prefetched cache first — instant load!
+      const cached = sessionStorage.getItem('prefetched_charts');
+      if (cached) {
+        try {
+          const charts = JSON.parse(cached);
+          setCharts(charts);
+          setLoggedIn(true);
+          setLoading(false);
+          sessionStorage.removeItem('prefetched_charts');
+          return; // skip API call entirely
+        } catch {}
+      }
+
       const supabase = createSupabaseBrowserClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const [{ data: { user } }, res] = await Promise.all([
+        supabase.auth.getUser(),
+        fetch("/api/charts"),
+      ]);
       if (!user) { setLoading(false); return; }
       setLoggedIn(true);
-      const res = await fetch("/api/charts");
       if (res.ok) {
         const json = await res.json();
         setCharts(json.charts ?? []);
@@ -112,7 +127,7 @@ export default function MyCharts({ onLoad }: Props) {
             borderRadius: isOpen ? "14px 14px 0 0" : "14px",
             color: "var(--gold)",
             fontFamily: "Cinzel, serif",
-            fontSize: 11,
+            fontSize: 13,
             letterSpacing: 2,
             cursor: "pointer",
             display: "flex",
@@ -128,7 +143,7 @@ export default function MyCharts({ onLoad }: Props) {
               background: "rgba(201,168,76,0.15)",
               border: "0.5px solid rgba(201,168,76,0.3)",
               borderRadius: 20, padding: "1px 8px",
-              fontSize: 10, color: "var(--gold-light)",
+              fontSize: 14, color: "var(--gold-light)",
             }}>
               {charts.length}
             </span>
@@ -136,7 +151,7 @@ export default function MyCharts({ onLoad }: Props) {
           <span style={{
             transition: "transform 0.25s cubic-bezier(0.16,1,0.3,1)",
             transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-            fontSize: 12, opacity: 0.6,
+            fontSize: 14, opacity: 0.6,
           }}>{"▾"}</span>
         </button>
 
@@ -197,7 +212,7 @@ export default function MyCharts({ onLoad }: Props) {
                       background: "var(--surface2)",
                       border: "0.5px solid rgba(201,168,76,0.3)",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 9,
+                      fontSize: 11,
                     }}>
                       {getRashi(c)}
                     </span>
@@ -216,7 +231,7 @@ export default function MyCharts({ onLoad }: Props) {
                       {c.name || "Unnamed Chart"}
                     </div>
                     <div style={{
-                      fontSize: 11, color: "#9E96B8",
+                      fontSize: 13, color: "#9E96B8",
                       display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap",
                     }}>
                       <span>{"☉"} {formatDate(c.dob)}</span>
@@ -227,7 +242,7 @@ export default function MyCharts({ onLoad }: Props) {
                     </div>
                     {/* Show lagna if available */}
                     {c.chart_data?.lagna?.rashi && (
-                      <div style={{ fontSize: 10, color: "rgba(201,168,76,0.5)", marginTop: 2 }}>
+                      <div style={{ fontSize: 14, color: "rgba(201,168,76,0.5)", marginTop: 2 }}>
                         {getRashi(c)} {c.chart_data.lagna.rashi} Lagna
                       </div>
                     )}
@@ -235,7 +250,7 @@ export default function MyCharts({ onLoad }: Props) {
 
                   {/* Load arrow */}
                   <div style={{
-                    fontSize: 11,
+                    fontSize: 13,
                     color: hoveredId === c.id ? "var(--gold)" : "#5A5470",
                     fontFamily: "Cinzel, serif", letterSpacing: 1,
                     transition: "all 0.2s",
@@ -249,13 +264,18 @@ export default function MyCharts({ onLoad }: Props) {
             </div>
 
             {/* Decorative footer with zodiac symbols */}
-            <div style={{
-              padding: "0.6rem 1.25rem",
+         <div style={{
+              padding: "0.75rem 1.25rem",
               borderTop: "0.5px solid rgba(201,168,76,0.08)",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
             }}>
-              {RASHI_SYMBOLS.slice(0, 6).map((s, i) => (
-                <span key={i} style={{ fontSize: 10, color: "rgba(201,168,76,0.2)" }}>{s}</span>
+              {RASHI_SYMBOLS.map((s, i) => (
+                <span key={i} style={{
+                  fontSize: 16,
+                  color: "rgba(201,168,76,0.5)",
+                  fontFamily: "'Segoe UI Symbol', 'Apple Color Emoji', serif",
+                  lineHeight: 1,
+                }}>{s}</span>
               ))}
             </div>
           </div>
