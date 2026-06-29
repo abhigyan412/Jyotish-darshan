@@ -37,15 +37,14 @@ function formatText(text: string): string {
 
 function TypingDots() {
   return (
-    <div style={{ display: "flex", gap: 4, alignItems: "center", padding: "4px 0" }}>
+    <div style={{ display: "flex", gap: 5, alignItems: "center", padding: "6px 2px", height: 28 }}>
       {[0, 1, 2].map(i => (
         <span key={i} style={{
-          width: 6, height: 6, borderRadius: "50%",
+          width: 7, height: 7, borderRadius: "50%",
           background: "var(--gold)",
-          opacity: 0.4,
-          animation: `typingPulse 1.2s ease-in-out infinite`,
-          animationDelay: `${i * 0.2}s`,
           display: "inline-block",
+          animation: `typingBounce 1.2s ease-in-out infinite`,
+          animationDelay: `${i * 0.18}s`,
         }} />
       ))}
     </div>
@@ -359,8 +358,12 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
         .chat-prose p { margin: 0 0 0.55rem; }
         .chat-prose p:last-child { margin-bottom: 0; }
         @keyframes typingPulse {
-          0%, 100% { opacity: 0.2; transform: translateY(0); }
-          50% { opacity: 1; transform: translateY(-3px); }
+          0%, 60%, 100% { opacity: 0.2; transform: translateY(0px); }
+          30% { opacity: 1; transform: translateY(-4px); }
+        }
+        @keyframes typingBounce {
+          0%, 60%, 100% { opacity: 0.2; transform: translateY(0px); }
+          30% { opacity: 1; transform: translateY(-4px); }
         }
         @keyframes msgFadeIn {
           from { opacity: 0; transform: translateY(8px); }
@@ -448,7 +451,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
                           </div>
                         )}
                       </>
-                    ) : loading && i === messages.length - 1 ? (
+                    ) : i === messages.length - 1 && loading ? (
                       <TypingDots />
                     ) : null
                   ) : (

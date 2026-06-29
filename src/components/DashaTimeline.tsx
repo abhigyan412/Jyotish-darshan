@@ -9,7 +9,7 @@ export default function DashaTimeline({ chart }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="text-xs  mb-4" style={{ color: "#9E96B8" }}>
+      <div className="text-xs mb-4" style={{ color: "#9E96B8" }}>
         Vimshottari Dasha — 120-year planetary cycle from Moon's nakshatra lord
       </div>
 
@@ -33,7 +33,7 @@ export default function DashaTimeline({ chart }: Props) {
                   {isActive && (
                     <span className="text-xs px-2 py-0.5 rounded-full"
                       style={{ background: "rgba(201,168,76,0.2)", color: "var(--gold-light)", fontSize: 11 }}>
-                      ✦ Active
+                      Active
                     </span>
                   )}
                 </div>
@@ -41,9 +41,10 @@ export default function DashaTimeline({ chart }: Props) {
                   {new Date(d.startDate).getFullYear()} - {new Date(d.endDate).getFullYear()} · {d.years} years
                 </div>
                 {isActive && activeAntar && (
-                  <div className="text-sm mt-1 " style={{ color: "#C4BEDD" }}>
+                  <div className="text-sm mt-1" style={{ color: "#C4BEDD" }}>
                     Current Antardasha: {PLANET_META[activeAntar.planet].symbol} {activeAntar.planetName}
-                    · ends {activeAntar.endDate.toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
+                    {" · ends "}
+                    {new Date(activeAntar.endDate).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
                   </div>
                 )}
               </div>
@@ -54,8 +55,8 @@ export default function DashaTimeline({ chart }: Props) {
 
             {/* Progress bar for active dasha */}
             {isActive && (() => {
-              const total = d.endDate.getTime() - d.startDate.getTime();
-              const elapsed = Date.now() - d.startDate.getTime();
+              const total = new Date(d.endDate).getTime() - new Date(d.startDate).getTime();
+              const elapsed = Date.now() - new Date(d.startDate).getTime();
               const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
               return (
                 <div className="mt-2 h-1 rounded-full overflow-hidden"
@@ -79,10 +80,12 @@ export default function DashaTimeline({ chart }: Props) {
               <span className="flex-1 text-sm" style={{ color: a.isActive ? "var(--gold-light)" : "var(--dim)" }}>
                 {a.planetName}
               </span>
-              <span className="text-xs " style={{ color: "#9E96B8" }}>
-                {a.startDate.toLocaleDateString("en-IN", { month: "short", year: "2-digit" })} – {a.endDate.toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}
+              <span className="text-xs" style={{ color: "#9E96B8" }}>
+                {new Date(a.startDate).toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}
+                {" – "}
+                {new Date(a.endDate).toLocaleDateString("en-IN", { month: "short", year: "2-digit" })}
               </span>
-              {a.isActive && <span style={{ color: "var(--gold)", fontSize: 10 }}>✦</span>}
+              {a.isActive && <span style={{ color: "var(--gold)", fontSize: 10 }}>{"✦"}</span>}
             </div>
           ))}
         </div>
