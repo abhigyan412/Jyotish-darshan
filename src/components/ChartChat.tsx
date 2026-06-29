@@ -22,7 +22,7 @@ interface Props {
 function formatText(text: string): string {
   return text
     .replace(/^---$/gm, "<hr style='border:none;border-top:0.5px solid rgba(201,168,76,0.15);margin:0.8rem 0;'/>")
-    .replace(/^#{1,3}\s+(.+)$/gm, "<div style='font-family:Cinzel,serif;font-size:0.95rem;letter-spacing:1.5px;color:var(--gold);margin:1rem 0 0.3rem;text-transform:uppercase;'>$1</div>")
+    .replace(/^#{1,3}\s+(.+)$/gm, "<div style='font-family:Cinzel,serif;font-size:0.85rem;letter-spacing:1.5px;color:var(--gold);margin:1rem 0 0.3rem;text-transform:uppercase;'>$1</div>")
     .replace(/\*\*(.+?)\*\*/g, "<strong style='color:var(--gold-light);font-weight:600;'>$1</strong>")
     .replace(/^- (.+)$/gm, "<div style='padding-left:1rem;margin:0.2rem 0;'>· $1</div>")
     .split(/\n{2,}/)
@@ -41,8 +41,7 @@ function TypingDots() {
       {[0, 1, 2].map(i => (
         <span key={i} style={{
           width: 7, height: 7, borderRadius: "50%",
-          background: "var(--gold)",
-          display: "inline-block",
+          background: "var(--gold)", display: "inline-block",
           animation: `typingBounce 1.2s ease-in-out infinite`,
           animationDelay: `${i * 0.18}s`,
         }} />
@@ -61,18 +60,10 @@ function CopyButton({ text }: { text: string }) {
         setTimeout(() => setCopied(false), 1500);
       }}
       style={{
-        background: "none",
-        border: "none",
-        cursor: "pointer",
+        background: "none", border: "none", cursor: "pointer",
         color: copied ? "var(--gold)" : "#5A5470",
-        fontSize: 13,
-        padding: "2px 6px",
-        borderRadius: 4,
-        transition: "color 0.15s",
-        marginTop: 6,
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
+        fontSize: 11, padding: "2px 6px", borderRadius: 4,
+        transition: "color 0.15s", display: "flex", alignItems: "center", gap: 4,
       }}
       title="Copy"
     >
@@ -81,55 +72,42 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function FeedbackButtons({
-  messageIndex, feedbackState, onFeedback, isStreaming,
-}: {
+function FeedbackButtons({ messageIndex, feedbackState, onFeedback, isStreaming }: {
   messageIndex: number;
   feedbackState: FeedbackState;
   onFeedback: (index: number, signal: "accurate" | "off" | "more") => void;
   isStreaming: boolean;
 }) {
   const [visible, setVisible] = useState(false);
-
   useEffect(() => {
     if (!isStreaming) {
       const t = setTimeout(() => setVisible(true), 400);
       return () => clearTimeout(t);
-    } else {
-      setVisible(false);
-    }
+    } else { setVisible(false); }
   }, [isStreaming]);
-
   if (!visible) return null;
-
   const current = feedbackState[messageIndex];
   const buttons: { signal: "accurate" | "off" | "more"; label: string; activeColor: string }[] = [
     { signal: "accurate", label: "✓ This landed", activeColor: "rgba(74,180,100,0.2)" },
-    { signal: "more", label: "↓ Tell me more", activeColor: "rgba(201,168,76,0.2)" },
-    { signal: "off", label: "✗ This missed", activeColor: "rgba(180,74,74,0.2)" },
+    { signal: "more",     label: "↓ Tell me more", activeColor: "rgba(201,168,76,0.2)" },
+    { signal: "off",      label: "✗ This missed",  activeColor: "rgba(180,74,74,0.2)" },
   ];
-
   return (
     <div style={{
       display: "flex", gap: 5, marginTop: 10, paddingTop: 8,
       borderTop: "0.5px solid rgba(201,168,76,0.08)", flexWrap: "wrap",
-      opacity: visible ? 1 : 0,
-      transition: "opacity 0.3s ease",
+      opacity: visible ? 1 : 0, transition: "opacity 0.3s ease",
     }}>
       {buttons.map(({ signal, label, activeColor }) => {
         const isActive = current === signal;
         return (
-          <button
-            key={signal}
-            onClick={() => onFeedback(messageIndex, signal)}
-            style={{
-              fontSize: 14, padding: "3px 10px", borderRadius: 12,
-              border: `0.5px solid ${isActive ? "rgba(201,168,76,0.45)" : "rgba(201,168,76,0.12)"}`,
-              background: isActive ? activeColor : "transparent",
-              color: isActive ? "var(--gold)" : "#9E96B8",
-              cursor: "pointer", transition: "all 0.15s",
-              fontFamily: "inherit", letterSpacing: 0.3,
-            }}
+          <button key={signal} onClick={() => onFeedback(messageIndex, signal)} style={{
+            fontSize: 11, padding: "3px 10px", borderRadius: 12,
+            border: `0.5px solid ${isActive ? "rgba(201,168,76,0.45)" : "rgba(201,168,76,0.12)"}`,
+            background: isActive ? activeColor : "transparent",
+            color: isActive ? "var(--gold)" : "#9E96B8",
+            cursor: "pointer", transition: "all 0.15s", fontFamily: "inherit", letterSpacing: 0.3,
+          }}
             onMouseEnter={e => { if (!isActive) { e.currentTarget.style.borderColor = "rgba(201,168,76,0.3)"; e.currentTarget.style.color = "var(--muted)"; } }}
             onMouseLeave={e => { if (!isActive) { e.currentTarget.style.borderColor = "rgba(201,168,76,0.12)"; e.currentTarget.style.color = "#9E96B8"; } }}
           >
@@ -156,19 +134,20 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
     content: `Namaste! I am your Jyotish guide. I have studied ${details.name || "your"} birth chart carefully — Lagna in ${chart.lagna.rashi}, Moon in ${chart.planets.find(p => p.key === "mo")?.position.rashi}. Ask me anything about your chart, destiny, career, relationships, or remedies.`,
   };
 
-  const [messages, setMessages] = useState<Message[]>([welcomeMsg]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [convId, setConvId] = useState<string | null>(null);
-  const [historyLoaded, setHistoryLoaded] = useState(false);
-  const [feedbackState, setFeedbackState] = useState<FeedbackState>({});
+  const [messages, setMessages]             = useState<Message[]>([welcomeMsg]);
+  const [input, setInput]                   = useState("");
+  const [loading, setLoading]               = useState(false);
+  const [convId, setConvId]                 = useState<string | null>(null);
+  const [historyLoaded, setHistoryLoaded]   = useState(false);
+  const [feedbackState, setFeedbackState]   = useState<FeedbackState>({});
   const [streamingIndex, setStreamingIndex] = useState<number | null>(null);
-  const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [showScrollBtn, setShowScrollBtn]   = useState(false);
 
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const sendingRef = useRef(false);
+  const bottomRef    = useRef<HTMLDivElement>(null);
+  const scrollRef    = useRef<HTMLDivElement>(null);
+  const textareaRef  = useRef<HTMLTextAreaElement>(null);
+  const sendingRef   = useRef(false);
+  const abortRef     = useRef<AbortController | null>(null);
   const isAtBottomRef = useRef(true);
 
   // ── Auto-resize textarea ─────────────────────────────────────────────────
@@ -182,28 +161,41 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
     ta.style.overflowY = ta.scrollHeight > 120 ? "auto" : "hidden";
   }, [input]);
 
-  // ── Track scroll position ────────────────────────────────────────────────
+  // ── Escape key to stop streaming ─────────────────────────────────────────
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
-      isAtBottomRef.current = atBottom;
-      setShowScrollBtn(!atBottom && messages.length > 1);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && loading) {
+        abortRef.current?.abort();
+      }
     };
-    el.addEventListener("scroll", onScroll);
-    return () => el.removeEventListener("scroll", onScroll);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [loading]);
+
+  // ── IntersectionObserver for scroll tracking ─────────────────────────────
+  useEffect(() => {
+    const anchor = bottomRef.current;
+    if (!anchor) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isAtBottomRef.current = entry.isIntersecting;
+        setShowScrollBtn(!entry.isIntersecting && messages.length > 1);
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(anchor);
+    return () => observer.disconnect();
   }, [messages.length]);
 
   // ── Smart auto-scroll ────────────────────────────────────────────────────
   useEffect(() => {
     if (isAtBottomRef.current) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, [messages]);
 
   const scrollToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     isAtBottomRef.current = true;
     setShowScrollBtn(false);
   }, []);
@@ -211,7 +203,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
   // ── Load conversation history ────────────────────────────────────────────
   useEffect(() => {
     if (!chartId || historyLoaded) return;
-    setHistoryLoaded(true); // set immediately to prevent double load
+    setHistoryLoaded(true);
     async function loadHistory() {
       try {
         const res = await fetch(`/api/conversations?chartId=${chartId}`);
@@ -224,7 +216,6 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
         if (!msgRes.ok) return;
         const { messages: history } = await msgRes.json();
         if (history?.length) {
-          // Deduplicate by content to prevent double rendering
           const seen = new Set<string>();
           const unique = history.filter((m: { role: string; content: string }) => {
             const key = `${m.role}:${m.content.slice(0, 50)}`;
@@ -244,6 +235,14 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
     loadHistory();
   }, [chartId]);
 
+  // ── Stop streaming ───────────────────────────────────────────────────────
+  const stopStreaming = useCallback(() => {
+    abortRef.current?.abort();
+    setLoading(false);
+    setStreamingIndex(null);
+    sendingRef.current = false;
+  }, []);
+
   // ── Core stream executor ─────────────────────────────────────────────────
   const executeStream = useCallback(async (userContent: string, baseMessages: Message[]) => {
     const userMsg: Message = { role: "user", content: userContent };
@@ -252,10 +251,14 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
     setLoading(true);
     isAtBottomRef.current = true;
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           details, chart, messages: currentMessages,
           chartId: chartId ?? undefined,
@@ -309,16 +312,21 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
       const newConvId = res.headers.get("x-conversation-id");
       if (newConvId && !convId) setConvId(newConvId);
 
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.name === "AbortError") {
+        // Stopped by user — keep whatever was streamed
+        setStreamingIndex(null);
+        return;
+      }
       setStreamingIndex(null);
       setMessages(prev => {
         const last = prev[prev.length - 1];
         if (last?.role === "assistant" && !last.content) {
           const updated = [...prev];
-          updated[updated.length - 1] = { role: "assistant", content: "Error: " + (err as Error).message };
+          updated[updated.length - 1] = { role: "assistant", content: "Error: " + err.message };
           return updated;
         }
-        return [...prev, { role: "assistant", content: "Error: " + (err as Error).message }];
+        return [...prev, { role: "assistant", content: "Error: " + err.message }];
       });
     } finally {
       setLoading(false);
@@ -360,15 +368,14 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
     } catch { /* best-effort */ }
   }, [messages, chartId, loading, executeStream]);
 
+  const isLastAssistant = (i: number) =>
+    i === messages.length - 1 && messages[i]?.role === "assistant";
+
   return (
     <>
       <style>{`
         .chat-prose p { margin: 0 0 0.55rem; }
         .chat-prose p:last-child { margin-bottom: 0; }
-        @keyframes typingPulse {
-          0%, 60%, 100% { opacity: 0.2; transform: translateY(0px); }
-          30% { opacity: 1; transform: translateY(-4px); }
-        }
         @keyframes typingBounce {
           0%, 60%, 100% { opacity: 0.2; transform: translateY(0px); }
           30% { opacity: 1; transform: translateY(-4px); }
@@ -383,16 +390,21 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
         }
         .msg-animate { animation: msgFadeIn 0.3s cubic-bezier(0.16,1,0.3,1) both; }
         .scroll-fab { animation: scrollBtnFade 0.2s ease both; }
-        .composer-wrap:focus-within { border-color: rgba(201,168,76,0.5) !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.06); }
+        .composer-wrap:focus-within {
+          border-color: rgba(201,168,76,0.5) !important;
+          box-shadow: 0 0 0 3px rgba(201,168,76,0.06);
+        }
         .send-btn:hover:not(:disabled) { background: var(--gold) !important; color: #07060F !important; transform: scale(1.05); }
         .send-btn:disabled { opacity: 0.35; }
+        .stop-btn:hover { background: rgba(239,68,68,0.2) !important; border-color: rgba(239,68,68,0.5) !important; color: #FCA5A5 !important; }
         .suggestion-chip:hover { border-color: rgba(201,168,76,0.6) !important; color: var(--gold) !important; background: rgba(201,168,76,0.06) !important; }
+        .regen-btn:hover { color: var(--gold) !important; }
       `}</style>
 
-      <div style={{ display: "flex", flexDirection: "column", height: 560, position: "relative" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: 580, position: "relative" }}>
 
         {/* ── Messages ── */}
-        <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", paddingRight: 4, marginBottom: 12, scrollBehavior: "smooth" }}>
+        <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", paddingRight: 4, marginBottom: 12 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {messages.map((m, i) => (
               <div
@@ -401,7 +413,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
                 style={{
                   display: "flex",
                   justifyContent: m.role === "user" ? "flex-end" : "flex-start",
-                  animationDelay: `${Math.min(i * 0.05, 0.3)}s`,
+                  animationDelay: `${Math.min(i * 0.04, 0.25)}s`,
                 }}
               >
                 <div style={{
@@ -412,17 +424,16 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
                     ? "linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.08))"
                     : "var(--surface2)",
                   border: `0.5px solid ${m.role === "user" ? "rgba(201,168,76,0.4)" : "rgba(201,168,76,0.1)"}`,
-                  fontSize: 14.5,
+                  fontSize: 15,
                   lineHeight: 1.75,
                   color: m.role === "user" ? "var(--gold-light)" : "var(--text)",
                   boxShadow: m.role === "user"
                     ? "0 2px 12px rgba(201,168,76,0.08)"
                     : "0 2px 8px rgba(0,0,0,0.15)",
-                  transition: "box-shadow 0.2s",
                 }}>
                   {m.role === "assistant" && (
                     <div style={{
-                      fontSize: 8, color: "var(--gold)", fontFamily: "Cinzel Decorative, serif",
+                      fontSize: 9, color: "var(--gold)", fontFamily: "Cinzel Decorative, serif",
                       letterSpacing: 2, marginBottom: 10, opacity: 0.7,
                       display: "flex", alignItems: "center", gap: 6,
                     }}>
@@ -430,8 +441,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
                         width: 16, height: 16, borderRadius: "50%",
                         background: "rgba(201,168,76,0.12)",
                         border: "0.5px solid rgba(201,168,76,0.3)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 8,
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8,
                       }}>{"✦"}</span>
                       JYOTISH GUIDE
                     </div>
@@ -446,20 +456,46 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
                             display: "inline-block", width: 2, height: "1em",
                             background: "var(--gold)", marginLeft: 2,
                             verticalAlign: "text-bottom",
-                            animation: "typingPulse 1s step-end infinite",
+                            animation: "typingBounce 1s step-end infinite",
                           }} />
                         )}
                         {i > 0 && streamingIndex !== i && (
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 4 }}>
                             <FeedbackButtons
                               messageIndex={i} feedbackState={feedbackState}
                               onFeedback={handleFeedback} isStreaming={streamingIndex === i}
                             />
-                            <CopyButton text={m.content} />
+                            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                              {/* Regenerate button on last assistant message */}
+                              {isLastAssistant(i) && (
+                                <button
+                                  className="regen-btn"
+                                  onClick={() => {
+                                    if (loading || sendingRef.current) return;
+                                    const lastUserMsg = [...messages].reverse().find(m => m.role === "user");
+                                    if (lastUserMsg) {
+                                      const msgsWithoutLast = messages.slice(0, -1);
+                                      sendingRef.current = true;
+                                      executeStream(lastUserMsg.content, msgsWithoutLast.slice(0, -1));
+                                    }
+                                  }}
+                                  style={{
+                                    background: "none", border: "none", cursor: "pointer",
+                                    color: "#5A5470", fontSize: 11, padding: "2px 6px",
+                                    borderRadius: 4, transition: "color 0.15s",
+                                    display: "flex", alignItems: "center", gap: 3,
+                                  }}
+                                  title="Regenerate"
+                                >
+                                  ↺ Regenerate
+                                </button>
+                              )}
+                              <CopyButton text={m.content} />
+                            </div>
                           </div>
                         )}
                       </>
-                    ) : i === messages.length - 1 && loading ? (
+                    ) : loading && i === messages.length - 1 ? (
                       <TypingDots />
                     ) : null
                   ) : (
@@ -478,18 +514,15 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
             className="scroll-fab"
             onClick={scrollToBottom}
             style={{
-              position: "absolute", bottom: 80, right: 8,
+              position: "absolute", bottom: 90, right: 8,
               width: 32, height: 32, borderRadius: "50%",
               background: "var(--surface2)",
               border: "0.5px solid rgba(201,168,76,0.35)",
               color: "var(--gold)", cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 14, zIndex: 10,
-              transition: "background 0.2s, transform 0.15s",
               boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(201,168,76,0.15)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "var(--surface2)"; }}
             title="Scroll to bottom"
           >
             ↓
@@ -503,12 +536,9 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
               <button
                 key={q}
                 className="suggestion-chip"
-                onClick={() => {
-                  setInput(q);
-                  textareaRef.current?.focus();
-                }}
+                onClick={() => { setInput(q); textareaRef.current?.focus(); }}
                 style={{
-                  fontSize: 14, padding: "6px 14px",
+                  fontSize: 12, padding: "6px 14px",
                   background: "var(--surface2)",
                   border: "0.5px solid rgba(201,168,76,0.2)",
                   borderRadius: 20, color: "#C4BEDD",
@@ -543,7 +573,7 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
             onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
             }}
-            disabled={loading}
+            disabled={false}
             style={{
               flex: 1, background: "transparent", border: "none", outline: "none",
               color: "var(--text)", fontFamily: "inherit", fontSize: 15,
@@ -551,27 +581,45 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, onU
               overflowY: "hidden", padding: "4px 0",
             }}
           />
-          <button
-            className="send-btn"
-            onClick={loading ? undefined : sendMessage}
-            disabled={!input.trim() && !loading}
-            style={{
-              width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
-              background: loading ? "rgba(201,168,76,0.15)" : "rgba(201,168,76,0.12)",
-              border: "0.5px solid rgba(201,168,76,0.3)",
-              color: "var(--gold)", cursor: loading ? "default" : "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 16, transition: "all 0.15s",
-            }}
-          >
-            {loading ? (
-              <span style={{ animation: "typingPulse 1s ease infinite", display: "inline-block" }}>⟳</span>
-            ) : "↑"}
-          </button>
+
+          {/* Stop button during streaming */}
+          {loading ? (
+            <button
+              className="stop-btn"
+              onClick={stopStreaming}
+              style={{
+                width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+                background: "rgba(239,68,68,0.1)",
+                border: "0.5px solid rgba(239,68,68,0.3)",
+                color: "#FCA5A5", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 14, transition: "all 0.15s",
+              }}
+              title="Stop (Esc)"
+            >
+              ■
+            </button>
+          ) : (
+            <button
+              className="send-btn"
+              onClick={sendMessage}
+              disabled={!input.trim()}
+              style={{
+                width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+                background: "rgba(201,168,76,0.12)",
+                border: "0.5px solid rgba(201,168,76,0.3)",
+                color: "var(--gold)", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 16, transition: "all 0.15s",
+              }}
+            >
+              ↑
+            </button>
+          )}
         </div>
 
-        <p style={{ textAlign: "center", fontSize: 14, color: "#5A5470", marginTop: 6, letterSpacing: 0.5 }}>
-          Press Enter to send · Shift+Enter for new line
+        <p style={{ textAlign: "center", fontSize: 10, color: "#5A5470", marginTop: 6, letterSpacing: 0.5 }}>
+          {loading ? "Press Esc to stop · " : ""}Press Enter to send · Shift+Enter for new line
         </p>
       </div>
     </>
