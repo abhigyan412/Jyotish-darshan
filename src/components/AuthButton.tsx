@@ -9,6 +9,7 @@ const TIER_COLORS: Record<SubscriptionTier, string> = {
   basic: "#C9A84C",
   pro:   "#78C8FF",
 };
+
 const TIER_LABELS: Record<SubscriptionTier, string> = {
   free:  "FREE",
   basic: "BASIC",
@@ -16,10 +17,20 @@ const TIER_LABELS: Record<SubscriptionTier, string> = {
 };
 
 export default function AuthButton() {
-  const [user, setUser]   = useState<{ email?: string } | null>(null);
-  const [tier, setTier]   = useState<SubscriptionTier>("free");
-  const [loading, setLoading] = useState(true);
+  const [user, setUser]             = useState<{ email?: string } | null>(null);
+  const [tier, setTier]             = useState<SubscriptionTier>("free");
+  const [daysLeft, setDaysLeft]     = useState<number | null>(null);
+  const [loading, setLoading]       = useState(true);
   const supabase = createSupabaseBrowserClient();
+
+  function calcDaysLeft(periodEnd: string | null): number | null {
+    if (!periodEnd) return null;
+    const end = new Date(periodEnd);
+    const now = new Date();
+    const diffMs = end.getTime() - now.getTime();
+    if (diffMs <= 0) return 0;
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  }
 
   useEffect(() => {
     async function loadUserAndTier() {
@@ -28,32 +39,34 @@ export default function AuthButton() {
       setUser(u);
 
       if (u) {
-        // Parallel fetch — don't wait sequentially
         supabase
           .from("profiles")
-          .select("tier")
+          .select("tier, current_period_end")
           .eq("id", u.id)
           .single()
           .then(({ data: profile }) => {
             setTier((profile?.tier ?? "free") as SubscriptionTier);
+            setDaysLeft(calcDaysLeft(profile?.current_period_end ?? null));
           });
       }
       setLoading(false);
     }
+
     loadUserAndTier();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (!u) setTier("free");
+      if (!u) { setTier("free"); setDaysLeft(null); }
       else {
         supabase
           .from("profiles")
-          .select("tier")
+          .select("tier, current_period_end")
           .eq("id", u.id)
           .single()
           .then(({ data: profile }) => {
             setTier((profile?.tier ?? "free") as SubscriptionTier);
+            setDaysLeft(calcDaysLeft(profile?.current_period_end ?? null));
           });
       }
     });
@@ -65,28 +78,44 @@ export default function AuthButton() {
     await supabase.auth.signOut();
     setUser(null);
     setTier("free");
+    setDaysLeft(null);
   }
 
   if (loading) return null;
 
   if (user) {
     const initial = user.email?.[0]?.toUpperCase() ?? "U";
+    const showExpiry = tier !== "free" && daysLeft !== null;
+    const isExpiringSoon = showExpiry && daysLeft !== null && daysLeft <= 5;
+
     return (
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
 
-        {/* Tier badge */}
-        <div style={{
-          fontFamily:    "Cinzel, serif",
-          fontSize:      "0.55rem",
-          letterSpacing: "1.5px",
-          color:         tier === "free" ? "#07060F" : TIER_COLORS[tier],
-          border:        `0.5px solid ${TIER_COLORS[tier]}`,
-          borderRadius:  "20px",
-          padding:       "2px 8px",
-          background:    tier === "free" ? "#E8E4D9" : "transparent",
-          opacity:       1,
-        }}>
-          {TIER_LABELS[tier]}
+        {/* Tier badge with days remaining */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+          <div style={{
+            fontFamily:    "Cinzel, serif",
+            fontSize:      "0.7rem",
+            letterSpacing: "1.5px",
+            color:         tier === "free" ? "#07060F" : TIER_COLORS[tier],
+            border:        `0.5px solid ${TIER_COLORS[tier]}`,
+            borderRadius:  "20px",
+            padding:       "4px 12px",
+            background:    tier === "free" ? "#E8E4D9" : "transparent",
+            opacity:       1,
+          }}>
+            {TIER_LABELS[tier]}
+          </div>
+          {showExpiry && (
+            <div style={{
+              fontSize: "0.68rem",
+              color: isExpiringSoon ? "#FCA5A5" : "#C4BEDD",
+              fontFamily: "Cinzel, serif",
+              letterSpacing: "0.5px",
+            }}>
+              {daysLeft === 0 ? "Expires today" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`}
+            </div>
+          )}
         </div>
 
         {/* Avatar */}
@@ -109,7 +138,7 @@ export default function AuthButton() {
             fontSize:      "0.7rem",
             letterSpacing: "1.5px",
             textTransform: "uppercase",
-            color: "#C4BEDD",
+            color:         "var(--lmuted)",
             background:    "transparent",
             border:        "none",
             cursor:        "pointer",

@@ -15,7 +15,7 @@ export default function TermsPage() {
         .pp{background:var(--lbg);color:var(--ltext);font-family:'EB Garamond',Georgia,serif;font-size:18px;line-height:1.8;min-height:100vh;}
         .pp-nav{padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--gold-dim);}
         .pp-logo{font-family:'Cinzel Decorative',serif;font-size:1rem;color:var(--gold);letter-spacing:2px;text-decoration:none;}
-        .pp-back{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:2px;color:var(--ldim);text-decoration:none;transition:color 0.2s;}
+        .pp-back{font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:2px;color:#C4BEDD;text-decoration:none;transition:color 0.2s;}
         .pp-back:hover{color:var(--gold);}
         .pp-wrap{max-width:760px;margin:0 auto;padding:4rem 2rem 6rem;}
         .pp-label{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;display:block;}
@@ -51,7 +51,7 @@ export default function TermsPage() {
 
           <h2 className="pp-h2">2. Important Disclaimer</h2>
           <p className="pp-p" style={{ background: "rgba(201,168,76,0.05)", border: "0.5px solid rgba(201,168,76,0.2)", borderRadius: 8, padding: "1rem 1.25rem" }}>
-            Jyotish Darshan is provided for <strong style={{ color: "var(--gold)" }}>entertainment and informational purposes only</strong>. Astrological readings are not a substitute for professional advice in medical, legal, financial, or psychological matters. We do not guarantee the accuracy of any predictions or interpretations. Do not make major life decisions based solely on astrological readings.
+            Jyotish Darshan provides Vedic astrological readings for <strong style={{ color: "var(--gold)" }}>self-reflection and informational purposes</strong>. While our calculations follow classical Jyotish methodology, astrological insights are interpretive in nature and should complement, not replace, professional advice in medical, legal, financial, or psychological matters. We encourage you to use these readings as one perspective among many when making important life decisions.
           </p>
 
           <h2 className="pp-h2">3. User Accounts</h2>
@@ -64,10 +64,10 @@ export default function TermsPage() {
 
           <h2 className="pp-h2">4. Subscription & Payments</h2>
           <ul className="pp-ul">
-            <li>Subscriptions are billed monthly and auto-renew unless cancelled</li>
-            <li>You may cancel your subscription at any time</li>
-            <li>Cancellation takes effect at the end of the current billing period</li>
-            <li>Refunds are not provided for partial billing periods</li>
+            <li>Subscriptions are valid for 30 days from the date of payment</li>
+            <li>To continue uninterrupted access, you must manually renew before your plan expires</li>
+            <li>Your account automatically reverts to the Free plan when your paid period ends</li>
+            <li>Refunds are not provided once a payment is processed</li>
             <li>We reserve the right to change pricing with 30 days notice</li>
             <li>Payments are processed by Razorpay — subject to their terms</li>
           </ul>

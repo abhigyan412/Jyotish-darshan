@@ -15,7 +15,7 @@ export default function PrivacyPage() {
         .pp{background:var(--lbg);color:var(--ltext);font-family:'EB Garamond',Georgia,serif;font-size:18px;line-height:1.8;min-height:100vh;}
         .pp-nav{padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--gold-dim);}
         .pp-logo{font-family:'Cinzel Decorative',serif;font-size:1rem;color:var(--gold);letter-spacing:2px;text-decoration:none;}
-        .pp-back{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:2px;color:var(--ldim);text-decoration:none;transition:color 0.2s;}
+        .pp-back{font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:2px;color:#C4BEDD;text-decoration:none;transition:color 0.2s;}
         .pp-back:hover{color:var(--gold);}
         .pp-wrap{max-width:760px;margin:0 auto;padding:4rem 2rem 6rem;}
         .pp-label{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;display:block;}
@@ -66,7 +66,7 @@ export default function PrivacyPage() {
 
           <h2 className="pp-h2">3. Data Storage & Security</h2>
           <p className="pp-p">
-            Your data is stored securely on Supabase (PostgreSQL database) with row-level security enabled. All data is encrypted in transit using HTTPS/TLS. We do not sell, rent, or share your personal information with third parties for marketing purposes.
+            All data is encrypted in transit using HTTPS/TLS. We do not sell, rent, or share your personal information with third parties for marketing purposes.
           </p>
 
           <h2 className="pp-h2">4. Third-Party Services</h2>
