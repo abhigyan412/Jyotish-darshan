@@ -138,3 +138,43 @@ export async function incrementMessageCount(
   await supabase.rpc("increment_messages_used", { user_id_input: userId });
   console.log("[auth] increment called for", userId);
 }
+
+// ─── Per-minute rate limiter (anti-abuse, independent of monthly limits) ──────
+
+export async function checkRateLimit(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string,
+  maxPerMinute: number = 8
+) {
+  const now = Date.now();
+  const windowStart = now - 60 * 1000; // 1 minute window
+
+  const { data: existing } = await supabase
+    .from("rate_limits")
+    .select("request_timestamps")
+    .eq("user_id", userId)
+    .single();
+
+  const timestamps: string[] = existing?.request_timestamps ?? [];
+  const recentTimestamps = timestamps
+    .map(t => new Date(t).getTime())
+    .filter(t => t > windowStart);
+
+  if (recentTimestamps.length >= maxPerMinute) {
+    throw new AuthError(
+      `RATE_LIMITED:You're sending messages too quickly. Please wait a moment.`,
+      429
+    );
+  }
+
+  // Add current timestamp and prune old ones
+  const updated = [...recentTimestamps, now].map(t => new Date(t).toISOString());
+
+  await supabase
+    .from("rate_limits")
+    .upsert({
+      user_id: userId,
+      request_timestamps: updated,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+}

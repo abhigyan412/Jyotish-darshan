@@ -95,6 +95,23 @@ function classifyQueryLocal(msg: string): string {
   return "general";
 }
 
+// ─── Condensed reminder for follow-up messages — replaces full prompt rebuild ──
+// Carries just enough identity to keep the voice and core chart facts consistent
+// without re-sending the full 5-8K token analysis every turn.
+function buildCondensedReminder(cachedPrompt: string, voicePrompt: string): string {
+  // Pull out the most load-bearing parts only: voice + a trimmed slice of chart facts.
+  // We keep the OUTPUT RULES block (small, critical) and a short excerpt of
+  // identity/relationship/career facts so continuity holds without full resend.
+  const outputRulesMatch = cachedPrompt.match(/── OUTPUT RULES ──[\s\S]*$/);
+  const outputRules = outputRulesMatch ? outputRulesMatch[0] : "";
+
+  return [
+    voicePrompt,
+    `\n── CONTINUING CONSULTATION ──\nYou already hold this person's full chart in memory from earlier in this conversation. Do not re-derive it. Speak with the same voice, specificity, and confluence-based reasoning as before. Stay consistent with anything already said in this thread.`,
+    outputRules,
+  ].filter(Boolean).join("\n\n");
+}
+
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
   try {
@@ -127,11 +144,14 @@ export async function POST(req: NextRequest) {
     let supabaseClient: any = null;
 
     try {
-      const { requireAuth, checkMessageLimit, incrementMessageCount } = await import("@/lib/auth");
+      const { requireAuth, checkMessageLimit, incrementMessageCount, checkRateLimit } = await import("@/lib/auth");
 
       const auth = await requireAuth();
       userId = auth.userId;
       supabaseClient = auth.supabase;
+
+      // Check rate limit first (anti-abuse, applies to all tiers)
+      await checkRateLimit(supabaseClient, userId, auth.tier === "pro" ? 15 : 8);
 
       // Check monthly message limit
       await checkMessageLimit(supabaseClient, userId, auth.tier);
@@ -169,6 +189,13 @@ export async function POST(req: NextRequest) {
 
     } catch (e: any) {
       console.log("[AUTH BLOCK] error:", e?.message, e?.status);
+      if (e?.message?.startsWith("RATE_LIMITED")) {
+        const msg = e.message.split(":")[1];
+        return new Response(
+          JSON.stringify({ error: msg }),
+          { status: 429, headers: { "Content-Type": "application/json" } }
+        );
+      }
       if (e?.message?.startsWith("UPGRADE_REQUIRED")) {
         const [, type, msg] = e.message.split(":");
         return new Response(
@@ -188,17 +215,64 @@ export async function POST(req: NextRequest) {
     // ─── Build system prompt ──────────────────────────────────────────────
     const lastUserContent = messages[messages.length - 1]?.content ?? "";
     const year = detectYear(lastUserContent);
+    const userTurnCount = messages.filter((m: any) => m.role === "user").length;
+    const isFollowUpMessage = userTurnCount > 1;
 
     let systemPrompt: string;
     let modelToUse = "claude-sonnet-4.5";
     let chartMemory: any = null;
+    let usedCondensed = false;
 
-    if (salienceEngineOk && queryClassifierOk && chart?.lagna && details) {
+    // ─── Follow-up messages: try condensed reminder instead of full rebuild ──
+    // Only condense for low-stakes generic continuations. Any query needing
+    // specific protocol scaffolding (timing, relationship, career, identity)
+    // ALWAYS gets the full rebuild — condensing dropped the active protocol
+    // and timing-confluence data, causing generic templated answers.
+    let preClassifiedQueryClass: string | null = null;
+    let preClassification: any = null;
+    if (isFollowUpMessage && queryClassifierOk) {
+      try {
+        preClassification = await classifyQuery(lastUserContent, messages.slice(-6));
+        preClassifiedQueryClass = preClassification.queryClass;
+      } catch (e) {
+        console.log("[diag] pre-classification failed, defaulting to full rebuild:", (e as Error).message);
+      }
+    }
+
+    // Only "general" has no dedicated protocol/scaffolding to lose — every other
+    // class (per queryClassifier.ts QUERY_PROTOCOLS) carries specific instructions
+    // that condensing would drop, causing generic templated output.
+    const SAFE_TO_CONDENSE_CLASSES = ["general"];
+    const needsFullRebuild =
+      !preClassifiedQueryClass ||
+      !SAFE_TO_CONDENSE_CLASSES.includes(preClassifiedQueryClass);
+
+    console.log("[diag] preClassifiedQueryClass=", preClassifiedQueryClass, "needsFullRebuild=", needsFullRebuild);
+
+    if (isFollowUpMessage && conversationId && supabaseClient && !year && !needsFullRebuild) {
+      try {
+        const { data: convData } = await supabaseClient
+          .from("conversations")
+          .select("cached_system_prompt, cached_prompt_chart_id")
+          .eq("id", conversationId)
+          .single();
+
+        if (convData?.cached_system_prompt && convData.cached_prompt_chart_id === chartId) {
+          systemPrompt = buildCondensedReminder(convData.cached_system_prompt, buildVoicePrompt());
+          usedCondensed = true;
+          console.log("[diag] Using CONDENSED follow-up prompt — length=", systemPrompt.length, "(vs full cached length=", convData.cached_system_prompt.length, ")");
+        }
+      } catch (e) {
+        console.log("[diag] cache lookup failed, will rebuild full prompt:", (e as Error).message);
+      }
+    }
+
+    if (!usedCondensed && salienceEngineOk && queryClassifierOk && chart?.lagna && details) {
       try {
         console.log("[diag] Attempting salience pipeline...");
 
-        // Step 1: classify
-        const classification = await classifyQuery(lastUserContent, messages.slice(-6));
+        // Step 1: classify (reuse pre-classification from condense-check if available)
+        const classification = preClassification ?? await classifyQuery(lastUserContent, messages.slice(-6));
         console.log("[diag] classify OK:", classification.queryClass);
 
         // Timing queries always need fresh transits — never serve from cache
@@ -314,6 +388,16 @@ export async function POST(req: NextRequest) {
         modelToUse = resolveModel(classification.modelTier);
         console.log(`[diag] FULL PIPELINE OK — model=${modelToUse} prompt.length=${systemPrompt.length}`);
 
+        // Cache this full prompt so follow-up messages can use the condensed version
+        if (conversationId && supabaseClient && !isFollowUpMessage) {
+          supabaseClient.from("conversations").update({
+            cached_system_prompt: systemPrompt,
+            cached_prompt_chart_id: chartId ?? null,
+          }).eq("id", conversationId).then(({ error }: any) => {
+            if (error) console.log("[diag] prompt cache save error:", error.message);
+          });
+        }
+
       } catch (e) {
         console.error("[diag] PIPELINE RUNTIME CRASH:", (e as Error).message, "\n", (e as Error).stack);
 
@@ -331,7 +415,7 @@ export async function POST(req: NextRequest) {
         console.log("[diag] Fell back to safe path — prompt.length=", systemPrompt.length);
       }
 
-    } else {
+    } else if (!usedCondensed) {
       console.log("[diag] Pipeline modules not all loaded, using safe path");
 
       const voicePrompt = buildVoicePrompt();
@@ -359,7 +443,7 @@ export async function POST(req: NextRequest) {
       supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
     };
 
-    console.log(`[diag] Calling Zima — model=${modelToUse}`);
+    console.log(`[diag] Calling Zima — model=${modelToUse} usedCondensed=${usedCondensed}`);
     console.log("[timing] pre-Zima:", Date.now() - startTime, "ms");
 
     const res = await fetch(`${baseUrl}/chat/completions`, {
@@ -373,7 +457,7 @@ export async function POST(req: NextRequest) {
         max_tokens: 1200,
         stream: true,
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: systemPrompt! },
           ...messages.slice(-10),
         ],
       }),
@@ -390,7 +474,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return streamOpenAI(res, persistArgs);
+    return streamOpenAI(res, persistArgs, conversationId);
 
   } catch (err) {
     console.error("[diag] TOP LEVEL CRASH:", (err as Error).message, (err as Error).stack);
@@ -457,7 +541,7 @@ type PersistArgs = {
 
 // ─── Stream ────────────────────────────────────────────────────────────────────
 
-function streamOpenAI(res: Response, persist: PersistArgs): Response {
+function streamOpenAI(res: Response, persist: PersistArgs, conversationId: string | null): Response {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
@@ -528,6 +612,9 @@ function streamOpenAI(res: Response, persist: PersistArgs): Response {
   });
 
   return new Response(readable, {
-    headers: { "Content-Type": "text/plain; charset=utf-8" },
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      ...(conversationId ? { "x-conversation-id": conversationId } : {}),
+    },
   });
 }
