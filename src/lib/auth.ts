@@ -80,7 +80,17 @@ export async function checkChartLimit(
   }
 }
 
-// ─── Monthly Message Limit ────────────────────────────────────────────────────
+// ─── Message Limit — reset interval now depends on tier ───────────────────────
+// "weekly" tier resets every 7 days; "free" and "pro" reset every 30 days.
+// This matters because the field is shared (messages_used / messages_reset_at)
+// across all tiers in the profiles table — without this branch, a weekly
+// subscriber's cap would only refresh once a month, defeating the tier.
+
+const RESET_INTERVAL_DAYS: Record<SubscriptionTier, number> = {
+  free: 30,
+  weekly: 7,
+  pro: 30,
+};
 
 export async function checkMessageLimit(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
@@ -89,6 +99,8 @@ export async function checkMessageLimit(
 ) {
   const max = TIER_LIMITS[tier].maxMessagesPerMonth;
   if (max === Infinity) return;
+
+  const resetIntervalDays = RESET_INTERVAL_DAYS[tier] ?? 30;
 
   // Fetch current usage
   const { data: profile } = await supabase
@@ -102,8 +114,8 @@ export async function checkMessageLimit(
     ? new Date(profile.messages_reset_at)
     : null;
 
-  // Reset counter if a month has passed
-  const shouldReset = !resetAt || now >= new Date(resetAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+  // Reset counter if the tier's interval has passed since the last reset
+  const shouldReset = !resetAt || now >= new Date(resetAt.getTime() + resetIntervalDays * 24 * 60 * 60 * 1000);
 
   if (shouldReset) {
     await supabase
@@ -116,27 +128,29 @@ export async function checkMessageLimit(
   const used = profile?.messages_used ?? 0;
 
   if (used >= max) {
+    const periodLabel = tier === "weekly" ? "this week" : "this month";
     throw new AuthError(
-      `UPGRADE_REQUIRED:message:You've used all ${max} messages on your ${tier} plan this month.`,
+      `UPGRADE_REQUIRED:message:You've used all ${max} messages on your ${tier} plan ${periodLabel}.`,
       403
     );
   }
 }
 
 // ─── Increment message count after successful message ─────────────────────────
+// Cleaned up: removed a dead/no-op update call that was passing a Promise
+// into the update payload before the actual RPC call. The RPC call below
+// was the only one that ever actually worked.
 
 export async function incrementMessageCount(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   userId: string
 ) {
-  const { error } = await supabase
-    .from("profiles")
-    .update({ messages_used: supabase.rpc("increment_messages_used") })
-    .eq("id", userId);
-    
-  // Direct SQL increment instead
-  await supabase.rpc("increment_messages_used", { user_id_input: userId });
-  console.log("[auth] increment called for", userId);
+  const { error } = await supabase.rpc("increment_messages_used", { user_id_input: userId });
+  if (error) {
+    console.log("[auth] increment FAILED for", userId, error.message);
+  } else {
+    console.log("[auth] increment called for", userId);
+  }
 }
 
 // ─── Per-minute rate limiter (anti-abuse, independent of monthly limits) ──────

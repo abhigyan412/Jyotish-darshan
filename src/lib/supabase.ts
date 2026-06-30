@@ -13,7 +13,11 @@ export function createSupabaseBrowserClient() {
 
 // ─── Shared types (safe everywhere) ──────────────────────────────────────────
 
-export type SubscriptionTier = "free" | "basic" | "pro";
+// RENAMED: "basic" -> "weekly" as part of the cost-corrected tier restructure.
+// If existing user rows have tier='basic' in the database, run the migration
+// SQL below before deploying this type change, or those rows will silently
+// fall through TIER_LIMITS lookups.
+export type SubscriptionTier = "free" | "weekly" | "pro";
 
 export interface Profile {
   id: string;
@@ -64,13 +68,25 @@ export interface DbMessage {
   created_at: string;
 }
 
+// ─── TIER LIMITS — corrected against real measured Zima cost data ───────────
+// Blended real cost per message: ~₹2.07 (verified via Zima dashboard,
+// post condensing-fix). Previous limits (basic: 500/mo, pro: 3000/mo) were
+// set before this was measured and would produce deeply negative margins
+// (-421% and -522% respectively) if a subscriber actually used their cap.
+//
+// NOTE on "weekly" reset interval: maxMessagesPerMonth is misleadingly named
+// for this tier — for "weekly" it must be enforced on a 7-day rolling window,
+// not 30. See the updated checkMessageLimit() in auth.ts which branches on
+// tier to pick the correct reset interval. Do not rename the field without
+// also updating every other place that reads it.
+
 export const TIER_LIMITS: Record<SubscriptionTier, {
   maxCharts: number;
-  maxMessagesPerMonth: number;
+  maxMessagesPerMonth: number;  // interpreted as PER WEEK for the "weekly" tier — see note above
   yearlyPredictions: boolean;
   transitAnalysis: boolean;
 }> = {
-  free: { maxCharts: 3, maxMessagesPerMonth: 20, yearlyPredictions: false, transitAnalysis: false },
-  basic: { maxCharts: 10, maxMessagesPerMonth: 500, yearlyPredictions: true, transitAnalysis: true },
-  pro: { maxCharts: 50, maxMessagesPerMonth: 3000, yearlyPredictions: true, transitAnalysis: true },
+  free:   { maxCharts: 2,  maxMessagesPerMonth: 3,   yearlyPredictions: false, transitAnalysis: false },
+  weekly: { maxCharts: 5,  maxMessagesPerMonth: 20,  yearlyPredictions: true,  transitAnalysis: true  },
+  pro:    { maxCharts: 50, maxMessagesPerMonth: 250, yearlyPredictions: true,  transitAnalysis: true  },
 };

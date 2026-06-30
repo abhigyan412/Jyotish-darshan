@@ -9,21 +9,23 @@ interface Props {
   onClose: () => void;
 }
 
+// Updated to match real measured Zima cost data — see cost audit.
+// "basic" renamed to "weekly" with corrected limits and price.
 const PLANS = [
   {
-    key: "basic",
-    name: "Basic",
-    price: "₹199",
-    period: "/month",
-    features: ["10 charts", "500 messages/month", "Yearly predictions", "Transit analysis"],
+    key: "weekly",
+    name: "Weekly",
+    price: "₹99",
+    period: "/week",
+    features: ["5 charts", "20 messages/week", "Yearly predictions", "Transit analysis"],
   },
   {
     key: "pro",
     name: "Pro",
-    price: "₹999",
+    price: "₹1299",
     period: "/month",
     featured: true,
-    features: ["Unlimited charts", "Unlimited messages", "Yearly predictions", "Transit analysis", "Priority support"],
+    features: ["50 charts", "250 messages/month", "Yearly predictions", "Transit analysis", "Priority support"],
   },
 ];
 
@@ -47,12 +49,14 @@ export default function UpgradeModal({ reason, onClose }: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to create order");
 
+      const periodLabel = plan === "weekly" ? "Weekly" : "Monthly";
+
       const rzp = new (window as any).Razorpay({
         key:         data.key,
         amount:      data.amount,
         currency:    data.currency,
         name:        "Jyotish Darshan",
-        description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan — Monthly`,
+        description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan — ${periodLabel}`,
         order_id:    data.orderId,
         prefill:     { email: user.email },
         theme:       { color: "#C9A84C" },
@@ -83,29 +87,40 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           position: fixed; inset: 0; z-index: 1000;
           background: rgba(4, 3, 10, 0.92);
           backdrop-filter: blur(12px);
-          display: flex; align-items: center; justify-content: center;
-          padding: 1rem;
+          display: flex; align-items: flex-start; justify-content: center;
+          /* FIX: was align-items:center with no scroll fallback — on short
+             mobile viewports this clipped the modal top/bottom with no way
+             to reach the cut-off content. Now top-aligned with padding and
+             the overlay itself scrolls if the modal is taller than the screen. */
+          padding: 2rem 1rem;
+          overflow-y: auto;
         }
         .um-modal {
           position: relative;
           width: 100%; max-width: 580px;
+          margin: auto 0; /* keeps it vertically centered when it DOES fit, top-aligned when it doesn't */
           background: linear-gradient(160deg, #13112A 0%, #0D0C1A 100%);
           border: 0.5px solid rgba(201,168,76,0.25);
           border-radius: 20px;
           padding: 3rem 2.5rem 2.5rem;
           box-shadow: 0 40px 80px rgba(0,0,0,0.7), inset 0 0.5px 0 rgba(201,168,76,0.15);
+          max-height: calc(100vh - 4rem);
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
         }
         .um-close {
-          position: absolute; top: 1.25rem; right: 1.25rem;
+          position: sticky; top: 0; float: right;
+          margin-top: -1.75rem; margin-right: -1.5rem;
           width: 28px; height: 28px; border-radius: 50%;
-          background: rgba(255,255,255,0.04);
+          background: rgba(13,12,26,0.9);
           border: 0.5px solid rgba(201,168,76,0.2);
           color: #9E96B8; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
           font-size:0.98rem; transition: all 0.2s;
+          z-index: 2;
         }
         .um-close:hover { color: #C9A84C; border-color: rgba(201,168,76,0.5); }
-        .um-header { text-align: center; margin-bottom: 2rem; }
+        .um-header { text-align: center; margin-bottom: 2rem; clear: both; }
         .um-badge {
           display: inline-block;
           font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 3px;
@@ -162,7 +177,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
         }
         .um-plan-period {
           font-family: 'EB Garamond', serif;
-          font-size: 0.8rem; color: #5A5470;
+          font-size: 0.8rem; color: #9E96B8;
           margin-bottom: 1.25rem;
         }
         .um-plan-divider {
@@ -201,7 +216,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           width: 100%; padding: 0.75rem;
           background: transparent;
           border: 0.5px solid rgba(201,168,76,0.2);
-          border-radius: 10px; color: #5A5470;
+          border-radius: 10px; color: #9E96B8;
           font-family: 'Cinzel', serif;
           font-size:0.90rem; letter-spacing: 1.5px;
           cursor: pointer; transition: all 0.2s;
@@ -216,9 +231,11 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           font-family: 'EB Garamond', serif;
         }
         @media(max-width: 480px) {
-          .um-modal { padding: 2rem 1.25rem 1.75rem; }
+          .um-overlay { padding: 1rem 0.75rem; }
+          .um-modal { padding: 2rem 1.25rem 1.75rem; max-height: calc(100vh - 2rem); }
           .um-plans { grid-template-columns: 1fr; }
           .um-title { font-size: 1.2rem; }
+          .um-close { margin-right: -0.75rem; }
         }
       `}</style>
 
@@ -239,7 +256,7 @@ export default function UpgradeModal({ reason, onClose }: Props) {
           <div className="um-plans">
             {PLANS.map(plan => (
               <div key={plan.key} className={`um-plan${plan.featured ? " featured" : ""}`}>
-                <div className="um-plan-tag">{plan.featured ? "✦ MOST POPULAR" : "BASIC"}</div>
+                <div className="um-plan-tag">{plan.featured ? "✦ MOST POPULAR" : "WEEKLY"}</div>
                 <div className="um-plan-price">{plan.price}</div>
                 <div className="um-plan-period">{plan.period}</div>
                 <div className="um-plan-divider" />

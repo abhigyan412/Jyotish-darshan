@@ -289,7 +289,7 @@ export default function LandingPage() {
         <section className="lp-section" style={{ textAlign: "center" }}>
           <div className="lp-label" style={{ display: "block" }}>✦ Pricing</div>
           <h2 className="lp-h2">Simple, Transparent Pricing</h2>
-          <p className="lp-lead" style={{ margin: "0 auto 3rem" }}>Start free. Upgrade when the stars align.</p>
+          <p className="lp-lead" style={{ margin: "0 auto 3rem" }}>Try it for the price of a chai. Go deeper when it's working for you.</p>
 
           {/* Pricing cards */}
           <div className="lp-pricing">
@@ -304,56 +304,56 @@ export default function LandingPage() {
                 <li className="included">Full Kundli generation</li>
                 <li className="included">Planetary positions & yogas</li>
                 <li className="included">Vimshottari Dasha timeline</li>
-                <li className="included">3 saved charts</li>
+                <li className="included">2 saved charts</li>
               </ul>
               <span className="lp-pf-section">AI ACCESS</span>
               <ul className="lp-pf">
-                <li className="included">20 AI messages / month</li>
+                <li className="included">3 AI messages / month</li>
                 <li className="excluded">Yearly predictions</li>
                 <li className="excluded">Transit analysis</li>
               </ul>
               <Link href="/app" className="lp-btn-ghost" style={{ width: "100%", textAlign: "center", display: "block", marginTop: "1.5rem" }}>Start Free</Link>
             </div>
 
-            {/* BASIC */}
+            {/* WEEKLY */}
             <div className="lp-pricing-card featured">
-              <span className="lp-plan">✦ BASIC</span>
-              <div className="lp-price">&#8377;199</div>
-              <p className="lp-period">per month · cancel anytime</p>
+              <span className="lp-plan">✦ WEEKLY</span>
+              <div className="lp-price">&#8377;99</div>
+              <p className="lp-period">per week · cancel anytime</p>
               <span className="lp-pf-section">KUNDLI</span>
               <ul className="lp-pf">
                 <li className="included">Everything in Free</li>
-                <li className="included">10 saved charts</li>
+                <li className="included">5 saved charts</li>
                 <li className="included">Chart history & reload</li>
               </ul>
               <span className="lp-pf-section">AI ACCESS</span>
               <ul className="lp-pf">
-                <li className="included">500 AI messages / month</li>
+                <li className="included">20 AI messages / week</li>
                 <li className="included">Yearly predictions</li>
                 <li className="included">Transit analysis</li>
               </ul>
-              <Link href="/app?upgrade=basic" className="lp-btn-primary" style={{ width: "100%", textAlign: "center", display: "block", marginTop: "1.5rem" }}>Get Basic &#8377;199/mo</Link>
+              <Link href="/app?upgrade=weekly" className="lp-btn-primary" style={{ width: "100%", textAlign: "center", display: "block", marginTop: "1.5rem" }}>Get Weekly &#8377;99/wk</Link>
             </div>
 
             {/* PRO */}
             <div className="lp-pricing-card">
               <span className="lp-plan">✦ PRO</span>
-              <div className="lp-price">&#8377;999</div>
+              <div className="lp-price">&#8377;1299</div>
               <p className="lp-period">per month · cancel anytime</p>
               <span className="lp-pf-section">KUNDLI</span>
               <ul className="lp-pf">
-                <li className="included">Everything in Basic</li>
-                <li className="included">Unlimited saved charts</li>
+                <li className="included">Everything in Weekly</li>
+                <li className="included">50 saved charts</li>
                 <li className="included">Priority chart processing</li>
               </ul>
               <span className="lp-pf-section">AI ACCESS</span>
               <ul className="lp-pf">
-                <li className="included">Unlimited AI messages</li>
+                <li className="included">250 AI messages / month</li>
                 <li className="included">Yearly predictions</li>
                 <li className="included">Transit analysis</li>
                 <li className="included">Priority support</li>
               </ul>
-              <Link href="/app?upgrade=pro" className="lp-btn-primary" style={{ width: "100%", textAlign: "center", display: "block", marginTop: "1.5rem" }}>Get Pro &#8377;999/mo</Link>
+              <Link href="/app?upgrade=pro" className="lp-btn-primary" style={{ width: "100%", textAlign: "center", display: "block", marginTop: "1.5rem" }}>Get Pro &#8377;1299/mo</Link>
             </div>
           </div>
 
@@ -362,7 +362,7 @@ export default function LandingPage() {
             <div className="lp-compare-header">
               <div className="lp-compare-cell" style={{ fontFamily: "Cinzel, serif", fontSize: "0.65rem", letterSpacing: "2px", color: "var(--gold)", padding: "1rem 1.25rem" }}>FEATURE</div>
               <div className="lp-compare-cell center" style={{ fontFamily: "Cinzel, serif", fontSize: "0.65rem", letterSpacing: "2px", color: "#9E96B8", padding: "1rem 1.25rem" }}>FREE</div>
-              <div className="lp-compare-cell center featured-col" style={{ fontFamily: "Cinzel, serif", fontSize: "0.65rem", letterSpacing: "2px", color: "var(--gold)", padding: "1rem 1.25rem" }}>BASIC</div>
+              <div className="lp-compare-cell center featured-col" style={{ fontFamily: "Cinzel, serif", fontSize: "0.65rem", letterSpacing: "2px", color: "var(--gold)", padding: "1rem 1.25rem" }}>WEEKLY</div>
               <div className="lp-compare-cell center" style={{ fontFamily: "Cinzel, serif", fontSize: "0.65rem", letterSpacing: "2px", color: "#9E96B8", padding: "1rem 1.25rem" }}>PRO</div>
             </div>
             {[
@@ -370,16 +370,16 @@ export default function LandingPage() {
               ["Planetary Positions",        "✦", "✦", "✦"],
               ["Yoga Detection",             "✦", "✦", "✦"],
               ["Vimshottari Dasha",          "✦", "✦", "✦"],
-              ["Saved Charts",               "3", "10", "Unlimited"],
-              ["AI Messages / Month",        "20", "500", "Unlimited"],
+              ["Saved Charts",               "2", "5", "50"],
+              ["AI Messages",                "3/month", "20/week", "250/month"],
               ["Yearly Predictions",         "–", "✦", "✦"],
               ["Transit Analysis",           "–", "✦", "✦"],
               ["Priority Support",           "–", "–", "✦"],
-            ].map(([feature, free, basic, pro]) => (
+            ].map(([feature, free, weekly, pro]) => (
               <div key={feature} className="lp-compare-row">
                 <div className="lp-compare-cell" style={{ color: "#C4BEDD", fontSize: "0.82rem" }}>{feature}</div>
                 <div className="lp-compare-cell center" style={{ color: free === "–" ? "#5A5470" : "var(--gold)", fontSize: free === "–" ? "1rem" : "0.7rem" }}>{free}</div>
-                <div className="lp-compare-cell center featured-col" style={{ color: basic === "–" ? "#5A5470" : "var(--gold)", fontSize: basic === "–" ? "1rem" : "0.7rem", fontWeight: 600 }}>{basic}</div>
+                <div className="lp-compare-cell center featured-col" style={{ color: weekly === "–" ? "#5A5470" : "var(--gold)", fontSize: weekly === "–" ? "1rem" : "0.7rem", fontWeight: 600 }}>{weekly}</div>
                 <div className="lp-compare-cell center" style={{ color: pro === "–" ? "#5A5470" : "var(--gold)", fontSize: pro === "–" ? "1rem" : "0.7rem" }}>{pro}</div>
               </div>
             ))}
@@ -395,7 +395,8 @@ export default function LandingPage() {
             {[
               ["How accurate are the calculations?", "We use the Lahiri Ayanamsa (the standard adopted by the Government of India) with VSOP87 planetary positions. Results are accurate to within 1–2 degrees — sufficient for reliable house and yoga determination."],
               ["Is my data private?", "Your birth details are used only to generate your chart and are not stored on our servers unless you create an account. We do not sell or share any personal information."],
-              ["Can I cancel my subscription anytime?", "Yes — cancel anytime from your account. You keep access until the end of your billing period. No questions asked."],
+              ["What's the difference between Weekly and Pro?", "Weekly is a low-commitment way to try full AI readings — ₹99 gets you 20 messages over 7 days, perfect for working through one specific question. Pro is for ongoing use across the month, with 250 messages and priority support."],
+              ["Can I cancel my subscription anytime?", "Yes — cancel anytime from your account. You keep access until the end of your current billing period. No questions asked."],
               ["Can I use this for Kundli Milan (marriage matching)?", "Not yet — Kundli Milan with Ashtakoota scoring is on our roadmap. For now, you can ask the chart chat about relationship compatibility based on your individual chart."],
               ["Do I need to know astrology to use this?", "Not at all. The AI explanations are written for everyone — from complete beginners to experienced practitioners. The app grows with your knowledge."],
             ].map(([q, a]) => (
