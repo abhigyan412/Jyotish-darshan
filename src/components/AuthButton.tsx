@@ -6,13 +6,13 @@ import type { SubscriptionTier } from "@/lib/supabase";
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
   free:  "#E8E4D9",
-  basic: "#C9A84C",
+  weekly: "#C9A84C",
   pro:   "#78C8FF",
 };
 
 const TIER_LABELS: Record<SubscriptionTier, string> = {
   free:  "FREE",
-  basic: "BASIC",
+  weekly: "BASIC",
   pro:   "PRO ✦",
 };
 
