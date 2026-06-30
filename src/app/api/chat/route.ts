@@ -232,8 +232,11 @@ export async function POST(req: NextRequest) {
     let preClassification: any = null;
     if (isFollowUpMessage && queryClassifierOk) {
       try {
-        preClassification = await classifyQuery(lastUserContent, messages.slice(-6));
+        const { createZimaClassifierClient } = await import("@/lib/zimaClassifierClient");
+        const classifierClient = apiKey ? createZimaClassifierClient(apiKey) : undefined;
+        preClassification = await classifyQuery(lastUserContent, messages.slice(-6), classifierClient);
         preClassifiedQueryClass = preClassification.queryClass;
+        console.log("[diag] classification stage used:", preClassification.classifiedBy, "class=", preClassifiedQueryClass);
       } catch (e) {
         console.log("[diag] pre-classification failed, defaulting to full rebuild:", (e as Error).message);
       }
@@ -272,8 +275,13 @@ export async function POST(req: NextRequest) {
         console.log("[diag] Attempting salience pipeline...");
 
         // Step 1: classify (reuse pre-classification from condense-check if available)
-        const classification = preClassification ?? await classifyQuery(lastUserContent, messages.slice(-6));
-        console.log("[diag] classify OK:", classification.queryClass);
+        let classification = preClassification;
+        if (!classification) {
+          const { createZimaClassifierClient } = await import("@/lib/zimaClassifierClient");
+          const classifierClient = apiKey ? createZimaClassifierClient(apiKey) : undefined;
+          classification = await classifyQuery(lastUserContent, messages.slice(-6), classifierClient);
+        }
+        console.log("[diag] classify OK:", classification.queryClass, "via", classification.classifiedBy);
 
         // Timing queries always need fresh transits — never serve from cache
         const isTimingQuery = (classification.queryClass as string).startsWith("timing_");
