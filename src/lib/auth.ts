@@ -154,41 +154,34 @@ export async function incrementMessageCount(
 }
 
 // ─── Per-minute rate limiter (anti-abuse, independent of monthly limits) ──────
+// FIXED: previous version did a separate SELECT then UPSERT from JS, which
+// raced under concurrent requests — multiple requests could read the same
+// "existing" state before any of them wrote back, so the count never
+// reliably reached maxPerMinute and the limiter could be bypassed by
+// simultaneous requests (e.g. double-tap send, multiple tabs).
+// Now delegates the whole check-and-record to a single atomic Postgres
+// function (check_and_record_rate_limit) that uses SELECT ... FOR UPDATE
+// to lock the user's row, making concurrent calls queue instead of race.
 
 export async function checkRateLimit(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   userId: string,
   maxPerMinute: number = 8
 ) {
-  const now = Date.now();
-  const windowStart = now - 60 * 1000; // 1 minute window
+  const { data: allowed, error } = await supabase.rpc("check_and_record_rate_limit", {
+    p_user_id: userId,
+    p_max_per_minute: maxPerMinute,
+  });
 
-  const { data: existing } = await supabase
-    .from("rate_limits")
-    .select("request_timestamps")
-    .eq("user_id", userId)
-    .single();
+  if (error) {
+    console.log("[ratelimit] RPC error:", error.message);
+    return; // fail-open on error, same behavior as the old version
+  }
 
-  const timestamps: string[] = existing?.request_timestamps ?? [];
-  const recentTimestamps = timestamps
-    .map(t => new Date(t).getTime())
-    .filter(t => t > windowStart);
-
-  if (recentTimestamps.length >= maxPerMinute) {
+  if (!allowed) {
     throw new AuthError(
       `RATE_LIMITED:You're sending messages too quickly. Please wait a moment.`,
       429
     );
   }
-
-  // Add current timestamp and prune old ones
-  const updated = [...recentTimestamps, now].map(t => new Date(t).toISOString());
-
-  await supabase
-    .from("rate_limits")
-    .upsert({
-      user_id: userId,
-      request_timestamps: updated,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
 }

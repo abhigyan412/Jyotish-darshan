@@ -31,7 +31,7 @@ const PLANS = [
 
 export default function UpgradeModal({ reason, onClose }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleUpgrade(plan: string) {
     setLoading(plan);
@@ -41,10 +41,10 @@ export default function UpgradeModal({ reason, onClose }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { window.location.href = "/sign-in"; return; }
 
-      const res  = await fetch("/api/payment/create-order", {
-        method:  "POST",
+      const res = await fetch("/api/payment/create-order", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ plan }),
+        body: JSON.stringify({ plan }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to create order");
@@ -52,21 +52,21 @@ export default function UpgradeModal({ reason, onClose }: Props) {
       const periodLabel = plan === "weekly" ? "Weekly" : "Monthly";
 
       const rzp = new (window as any).Razorpay({
-        key:         data.key,
-        amount:      data.amount,
-        currency:    data.currency,
-        name:        "Jyotish Darshan",
+        key: data.key,
+        amount: data.amount,
+        currency: data.currency,
+        name: "Jyotish Darshan",
         description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan — ${periodLabel}`,
-        order_id:    data.orderId,
-        prefill:     { email: user.email },
-        theme:       { color: "#C9A84C" },
+        order_id: data.orderId,
+        prefill: { email: user.email },
+        theme: { color: "#C9A84C" },
         handler: async (response: any) => {
           const verify = await fetch("/api/payment/verify", {
-            method:  "POST",
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ ...response, plan }),
+            body: JSON.stringify({ ...response, plan }),
           });
-          if (verify.ok) window.location.reload();
+          if (verify.ok) window.location.href = "/";
           else setError("Payment verification failed. Please contact support.");
         },
       });

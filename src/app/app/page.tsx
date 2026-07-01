@@ -44,7 +44,7 @@ export default function AppPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const plan = params.get("upgrade");
-    if (plan === "basic" || plan === "pro") {
+    if (plan === "weekly" || plan === "pro") {
       setUpgradeModal({
         reason: `Upgrade to ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan to unlock full access.`,
         limitType: "feature",
