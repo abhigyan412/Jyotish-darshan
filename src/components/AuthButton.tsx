@@ -12,7 +12,7 @@ const TIER_COLORS: Record<SubscriptionTier, string> = {
 
 const TIER_LABELS: Record<SubscriptionTier, string> = {
   free:  "FREE",
-  weekly: "BASIC",
+  weekly: "WEEKLY",
   pro:   "PRO ✦",
 };
 
