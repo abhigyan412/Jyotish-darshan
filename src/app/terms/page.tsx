@@ -64,7 +64,7 @@ export default function TermsPage() {
 
           <h2 className="pp-h2">4. Subscription & Payments</h2>
           <ul className="pp-ul">
-            <li>Subscriptions are valid for 30 days from the date of payment</li>
+            <li>We offer two subscription plans: Weekly (valid for 7 days) and Monthly (valid for 30 days) from the date of payment</li>
             <li>To continue uninterrupted access, you must manually renew before your plan expires</li>
             <li>Your account automatically reverts to the Free plan when your paid period ends</li>
             <li>Refunds are not provided once a payment is processed</li>
@@ -74,7 +74,7 @@ export default function TermsPage() {
 
           <h2 className="pp-h2">5. Free Plan Limitations</h2>
           <p className="pp-p">
-            The free plan includes 3 saved charts and 20 AI messages per month. These limits reset on the first day of each calendar month. We reserve the right to modify free plan limits at any time.
+            The free plan includes 2 saved charts and 3 AI messages per month. These limits reset on the first day of each calendar month. We reserve the right to modify free plan limits at any time.
           </p>
 
           <h2 className="pp-h2">6. Acceptable Use</h2>
