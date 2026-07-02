@@ -330,7 +330,6 @@ export default function ChartChat({ details, chart, chartId, transitPlanets, pre
       }
 
       const newConvId = res.headers.get("x-conversation-id");
-      console.log("[FRONTEND DEBUG] x-conversation-id header =", newConvId, "current convId =", convId);
       if (newConvId && !convId) setConvId(newConvId);
 
     } catch (err: any) {
